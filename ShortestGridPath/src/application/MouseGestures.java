@@ -19,19 +19,19 @@ public class MouseGestures
                 public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) 
                 {
 
-                    System.out.println( observable + ": " + newValue);
+                    //System.out.println( visible + ": " + newValue);
 
                     if(newValue) 
                     {
-                        ((Cell) node).hoverHighlight();
+                        ((Cell)node).hoverHighlight();
                     } 
                     else 
                     {
-                        ((Cell) node).hoverUnhighlight();
+                        ((Cell)node).hoverUnhighlight();
                     }
 
-                    for( String s: node.getStyleClass())
-                        System.out.println( node + ": " + s);
+                    //for( String s: node.getStyleClass())
+                        //System.out.println( node + ": " + s);
                 }
 
             });
@@ -66,11 +66,11 @@ public class MouseGestures
 
             Cell cell = (Cell) node;
 
-            if( event.isPrimaryButtonDown()) 
+            if(event.isPrimaryButtonDown()) 
             {
                 cell.highlight();
             } 
-            else if( event.isSecondaryButtonDown()) 
+            else if(event.isSecondaryButtonDown()) 
             {
                 cell.unhighlight();
             }
@@ -96,5 +96,20 @@ public class MouseGestures
         }
 
     };
+    
+    public void startPoint(Node node)
+    {
+    	((Cell)node).clean();
+    	((Cell)node).start();
+    }
+    public void goalPoint(Node node)
+    {
+    	((Cell)node).clean();
+    	((Cell)node).goal();
+    }
+    public void roughColor(Node node)
+    {
+    	((Cell)node).brown();
+    }
 
 }

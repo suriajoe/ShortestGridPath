@@ -48,6 +48,23 @@ public class Cell extends AnchorPane
     {
         getStyleClass().remove("cell-hover-highlight");
     }
+    
+    public void clean()
+    {
+    	getStyleClass().remove("cell-rough");
+    }
+    public void start() 
+    {
+        getStyleClass().add("cell-start");
+    }
+    public void goal() 
+    {
+        getStyleClass().add("cell-goal");
+    }
+    public void brown()
+    {
+    	getStyleClass().add("cell-rough");
+    }
 
     public String toString() 
     {

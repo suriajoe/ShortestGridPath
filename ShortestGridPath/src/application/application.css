@@ -1,11 +1,22 @@
 /* JavaFX CSS - Leave this comment until you have at least create one rule which uses -fx-Property */
 .cell {
-    -fx-border-color: blue;
+    -fx-border-color: grey;
     -fx-border-width: 1px;
 }
 .cell-highlight {
     -fx-background-color:derive(black,0.9);
 }
+
+.cell-start{
+	-fx-background-color:derive(green,0.9);
+}
+.cell-goal{
+	-fx-background-color:derive(red,0.5);
+}
+.cell-rough{
+	-fx-background-color:derive(brown,0.9);
+}
+
 .cell-hover-highlight {
-    -fx-background-color:derive(green,0.9);
+    -fx-background-color:derive(blue,0.9);
 }
