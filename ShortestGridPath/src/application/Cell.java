@@ -3,15 +3,16 @@ import javafx.scene.layout.AnchorPane;
 public class Cell extends AnchorPane 
 {
 
-    int column;
-    int row;
+    int column; //X coordinate
+    int row;    //Y coordinate
+    //int value;
 
     public Cell(int column, int row) 
     {
 
         this.column = column;
         this.row = row;
-
+        
         getStyleClass().add("cell");
 
 //      Label label = new Label(this.toString());
@@ -20,6 +21,17 @@ public class Cell extends AnchorPane
 
         setOpacity(0.9);
     }
+    
+    /*public Cell(int column, int row, value)
+     {
+     	this.column = column;
+     	this.row = row;
+     	this.value = value;
+     	
+     	getStyleClass().add("cell");
+     	
+     	setOpacity(0.9);
+     */
 
     public void highlight() 
     {
@@ -64,6 +76,10 @@ public class Cell extends AnchorPane
     public void brown()
     {
     	getStyleClass().add("cell-rough");
+    }
+    public boolean isOccupied()
+    {
+    	return getStyleClass().isEmpty();
     }
 
     public String toString() 

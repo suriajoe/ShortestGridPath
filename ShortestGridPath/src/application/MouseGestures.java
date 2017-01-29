@@ -109,7 +109,12 @@ public class MouseGestures
     }
     public void roughColor(Node node)
     {
-    	((Cell)node).brown();
+    	if((Cell)node == null)
+    	{
+    		
+    	}
+    	else
+    	  ((Cell)node).brown();
     }
 
 }

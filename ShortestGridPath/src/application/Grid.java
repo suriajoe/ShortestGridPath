@@ -36,10 +36,10 @@ public class Grid extends Pane
         double x = w * column;
         double y = h * row;
 
-        cell.setLayoutX(x*2);
-        cell.setLayoutY(y*2);
-        cell.setPrefWidth(w*2);
-        cell.setPrefHeight(h*2);
+        cell.setLayoutX(x);
+        cell.setLayoutY(y);
+        cell.setPrefWidth(w);
+        cell.setPrefHeight(h);
 
         getChildren().add(cell);
 
@@ -48,6 +48,15 @@ public class Grid extends Pane
     public Cell getCell(int column, int row) 
     {
         return cells[row][column];
+    }
+    public Cell roughCell(int column, int row)
+    {
+    	if(column > 159 || row > 119)
+    		return null;
+    	else if(column < 0 || row < 0)
+    		return null;
+    	else 
+    		return cells[row][column];
     }
 
      //Unhighlight all cells
