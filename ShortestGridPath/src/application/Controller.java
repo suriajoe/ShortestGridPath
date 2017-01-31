@@ -26,9 +26,12 @@ public class Controller extends Pane
 	
     int rows = 120;
     int columns = 160;
+    int value = 1;
+    int type = 0;
     
     double width = 1200;
     double height = 700;
+    
 	public void start(Stage mainStage)
 	{
 		try{
@@ -43,7 +46,7 @@ public class Controller extends Pane
             for (int column = 0; column < columns; column++) 
             {
 
-                Cell cell = new Cell(column, row);
+                Cell cell = new Cell(column, row, value, type);
 
                 //mouse.color(cell);  //Used to color cell when cursor is hovering
 
@@ -68,7 +71,7 @@ public class Controller extends Pane
         int rough1;
         
         int[][] rarray = new int[120][160];
-        int[][] blockedArray = new int[120][160];
+        int[][] blockedArray = new int[120][160];  //delete since Cell object contains value,type
         
         while(roughCount < 8)
         {
@@ -100,7 +103,11 @@ public class Controller extends Pane
     			  {
     			    mouse.roughColor(grid.roughCell(roughCoordinateX-i,roughCoordinateY-j));
     			    if((roughCoordinateX-i) >= 0 && (roughCoordinateY-j) >= 0 && (roughCoordinateX-i) < 160 && (roughCoordinateY-j) < 160)
+    			    {
     			    	blockedArray[roughCoordinateY-j][roughCoordinateX-i] = 1;
+    			    	grid.getCell(roughCoordinateX-i, roughCoordinateY-j).setValue(2);
+    			    	grid.getCell(roughCoordinateX-i, roughCoordinateY-j).setType(1);
+    			    }
     			  }
     		    }
     		    else if(i<15 && j>=15)
@@ -109,7 +116,11 @@ public class Controller extends Pane
     			  {
     			    mouse.roughColor(grid.roughCell(roughCoordinateX-i,roughCoordinateY+(j-15)));
     			    if((roughCoordinateX-i)>=0 && (roughCoordinateY+(j-15)) >=0 && ((roughCoordinateX-i) < 160) && (roughCoordinateY+(j-15) < 120))
+    			    {
     			    	blockedArray[roughCoordinateY+(j-15)][roughCoordinateX-i] = 1;
+    			    	grid.getCell(roughCoordinateX-i, roughCoordinateY+(j-15)).setValue(2);
+    			    	grid.getCell(roughCoordinateX-i, roughCoordinateY+(j-15)).setType(1);
+    			    }
     			  }
     		    }		  
     		    else if(i>=15 && j<15)
@@ -118,7 +129,11 @@ public class Controller extends Pane
     			  {
     			    mouse.roughColor(grid.roughCell(roughCoordinateX+(i-15),roughCoordinateY-j));
     			    if((roughCoordinateX+(i-15))>=0 && (roughCoordinateY-j) >=0 && ((roughCoordinateX+(i-15)) < 160) && (roughCoordinateY-j) < 120)
+    			    {
     			    	blockedArray[roughCoordinateY-j][roughCoordinateX+(i-15)] = 1;
+    			    	grid.getCell(roughCoordinateX+(i-15), roughCoordinateY-j).setValue(2);
+    			    	grid.getCell(roughCoordinateX+(i-15), roughCoordinateY-j).setType(1);
+    			    }
     			  }
     		    }  
     		    else
@@ -127,7 +142,11 @@ public class Controller extends Pane
     			  {
     			    mouse.roughColor(grid.roughCell(roughCoordinateX+(i-15),roughCoordinateY+(j-15)));	 
     			    if((roughCoordinateX+(i-15))>=0 && (roughCoordinateY+(j-15)) >=0 && ((roughCoordinateX+(i-15)) < 160) && (roughCoordinateY+(j-15) < 120))
+    			    {
     			    	blockedArray[roughCoordinateY+(j-15)][roughCoordinateX+(i-15)] = 1;
+    			    	grid.getCell(roughCoordinateX+(i-15), roughCoordinateY+(j-15)).setValue(2);
+    			    	grid.getCell(roughCoordinateX+(i-15), roughCoordinateY+(j-15)).setType(1);
+    			    }
     			  }
     		    }
     		   }
@@ -137,6 +156,10 @@ public class Controller extends Pane
         	roughIsCentered = true;
         }
         
+        //Highway path
+        HighwayConstructor highway = new HighwayConstructor(blockedArray);
+        highway.construct(blockedArray);
+        
         //Blocked Cells
         int xRand;
         int yRand;
@@ -145,9 +168,10 @@ public class Controller extends Pane
         {
         	xRand = rand.nextInt(160);
         	yRand = rand.nextInt(120);
-        	if(blockedArray[yRand][xRand] != 1)
+        	if(grid.getCell(xRand, yRand).getType() != 1 || grid.getCell(xRand, yRand).getType() != 2)
         	{
-        		blockedArray[yRand][xRand] = 1;
+		    	grid.getCell(xRand, yRand).setValue(0);
+		    	grid.getCell(xRand, yRand).setType(2);
         		grid.getCell(xRand, yRand).highlight();
         		blockedCount++;
         	}
@@ -203,12 +227,12 @@ public class Controller extends Pane
         	if(euclidean >= 100)
         	{
         		//X = col, Y = row
-        		if(blockedArray[startY][startX] != 1)
+        		if(grid.getCell(startX, startY).getType() !=2 || grid.getCell(startX, startY).getType() !=3)
         		{
-        			if(blockedArray[goalY][goalX] != 1)
+        			if(grid.getCell(goalX, goalY).getType() != 2 || grid.getCell(goalX, goalY).getType() !=3)
         			{
-        				blockedArray[startY][startX] = 1;
-        				blockedArray[goalY][goalX] = 1;
+    			    	grid.getCell(startX, startY).setType(3);
+    			    	grid.getCell(goalX, goalY).setType(3);
             			mouse.startPoint(grid.getCell(startX, startY));
                         mouse.goalPoint(grid.getCell(goalX, goalY));
                         distance100 = false;
@@ -217,11 +241,11 @@ public class Controller extends Pane
         		}
         	}
         }
-		}
-		catch(Exception e)
-		{
+	  }
+	  catch(Exception e)
+	  {
 			e.printStackTrace();
-		}
+	  }
 
     } 
 }

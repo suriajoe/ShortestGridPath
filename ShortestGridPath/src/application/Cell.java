@@ -5,7 +5,8 @@ public class Cell extends AnchorPane
 
     int column; //X coordinate
     int row;    //Y coordinate
-    //int value;
+    int value;  //0=blocked
+    int type;   //0=empty,1=hard/rough,2=block,3=start/goal vertex,4=highway
 
     public Cell(int column, int row) 
     {
@@ -22,16 +23,37 @@ public class Cell extends AnchorPane
         setOpacity(0.9);
     }
     
-    /*public Cell(int column, int row, value)
-     {
+    public Cell(int column, int row, int value, int type)
+    {
      	this.column = column;
      	this.row = row;
      	this.value = value;
+     	this.type = type;
      	
      	getStyleClass().add("cell");
      	
      	setOpacity(0.9);
-     */
+    }
+    
+    public int getValue()
+    {
+    	return this.value;
+    }
+    
+    public void setValue(int v)
+    {
+    	this.value = v;
+    }
+    
+    public int getType()
+    {
+    	return this.value;
+    }
+    
+    public void setType(int t)
+    {
+    	this.type = t;
+    }
 
     public void highlight() 
     {
