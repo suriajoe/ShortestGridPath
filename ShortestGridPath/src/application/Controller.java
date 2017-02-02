@@ -1,28 +1,40 @@
 import java.util.Random;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.control.Button;
-import javafx.scene.input.PickResult;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Label;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class Controller extends Pane
 {
 
 	@FXML private AnchorPane list;
 	@FXML Button points, rough, block, highway; 
+	@FXML Label xInfo,yInfo,timeInfo;
+	
+	private IntegerProperty xCoor;
+	private IntegerProperty yCoor;	
+	private IntegerProperty time;
+	public static final Duration INDEFINITE = new Duration(Double.POSITIVE_INFINITY);
 	
     int rows = 120;
     int columns = 160;
@@ -30,7 +42,7 @@ public class Controller extends Pane
     int type = 0;
     
     double width = 1200;
-    double height = 700;
+    double height = 670;
     
 	public void start(Stage mainStage)
 	{
@@ -39,7 +51,14 @@ public class Controller extends Pane
         Grid grid = new Grid(columns, rows, width, height);
 
         MouseGestures mouse = new MouseGestures();
- 
+        
+        xCoor = new SimpleIntegerProperty(0);
+        yCoor = new SimpleIntegerProperty(0);
+        time = new SimpleIntegerProperty(0);
+        xInfo.textProperty().bind(xCoor.asString());
+        yInfo.textProperty().bind(yCoor.asString());
+        timeInfo.textProperty().bind(time.asString("%s ms"));
+        
         // fill grid with empty cells
         for (int row = 0; row < rows; row++) 
         {
@@ -48,12 +67,12 @@ public class Controller extends Pane
 
                 Cell cell = new Cell(column, row, value, type);
 
-                //mouse.color(cell);  //Used to color cell when cursor is hovering
+                mouse.color(cell,xCoor,yCoor);  
 
                 grid.add(cell, column, row);
             }
         }
-        
+
         //If I addAll(grid) twice will i get conflicts
         //list.getChildren().addAll(grid);
         
@@ -157,8 +176,8 @@ public class Controller extends Pane
         }
         
         //Highway path
-        HighwayConstructor highway = new HighwayConstructor(blockedArray);
-        highway.construct(blockedArray);
+        //HighwayConstructor highway = new HighwayConstructor(blockedArray);
+        //highway.construct(blockedArray);
         
         //Blocked Cells
         int xRand;
@@ -246,8 +265,24 @@ public class Controller extends Pane
 	  {
 			e.printStackTrace();
 	  }
-
-    } 
+    }
+	
+	/*Create a thread that sets a timer when path starts, stop timer when goal reached
+	long tStart = System.currentTimeMillis();
+	public void time() throws InterruptedException
+	{
+	   Timeline timeline = new Timeline(new KeyFrame(Duration.millis(1), ae->doSomething()));
+	
+	   timeline.setCycleCount(Animation.INDEFINITE);
+	   timeline.play();
+	}
+	
+	int count;
+	public void doSomething()
+	{
+		time.setValue(System.currentTimeMillis()-tStart);
+	}
+	*/
 }
 
 

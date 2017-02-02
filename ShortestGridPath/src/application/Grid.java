@@ -59,7 +59,7 @@ public class Grid extends Pane
     		return cells[row][column];
     }
 
-     //Unhighlight all cells
+     /*Unhighlight all cells
     public void unhighlight() 
     {
         for( int row=0; row < rows; row++) 
@@ -70,4 +70,5 @@ public class Grid extends Pane
             }
         }
     }
+    */
 }

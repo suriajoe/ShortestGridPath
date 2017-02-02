@@ -1,3 +1,4 @@
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
@@ -9,7 +10,7 @@ public class MouseGestures
 {
     boolean showHoverCursor = true;
     
-    public void color(Node node) 
+    public void color(Node node, IntegerProperty xCoordinate, IntegerProperty yCoordinate) 
     {
         if(showHoverCursor) 
         {
@@ -23,11 +24,13 @@ public class MouseGestures
 
                     if(newValue) 
                     {
-                        ((Cell)node).hoverHighlight();
+                    	((Cell)node).hoverHighlight();
+                    	xCoordinate.setValue(((Cell)node).getColumn());
+                    	yCoordinate.setValue(((Cell)node).getRow());
                     } 
                     else 
                     {
-                        ((Cell)node).hoverUnhighlight();
+                    	((Cell)node).hoverUnhighlight();
                     }
 
                     //for( String s: node.getStyleClass())
@@ -37,12 +40,13 @@ public class MouseGestures
             });
         }
 
-        node.setOnMousePressed( onMousePressedEventHandler);
-        node.setOnDragDetected( onDragDetectedEventHandler);
-        node.setOnMouseDragEntered(onMouseDragEnteredEventHandler);
+        //node.setOnMousePressed(onMousePressedEventHandler);
+        //node.setOnDragDetected(onDragDetectedEventHandler);
+        //node.setOnMouseDragEntered(onMouseDragEnteredEventHandler);
 
     }
-
+    
+    /*
     EventHandler<MouseEvent> onMousePressedEventHandler = event -> {
 
         Cell cell = (Cell) event.getSource();
@@ -96,6 +100,7 @@ public class MouseGestures
         }
 
     };
+    */
     
     public void startPoint(Node node)
     {

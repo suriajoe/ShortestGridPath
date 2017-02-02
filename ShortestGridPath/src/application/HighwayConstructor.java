@@ -26,9 +26,9 @@ public class HighwayConstructor {
 		Stack path = new Stack();
 		for(int i=0; i<4; i++){
 			found = false;
-			array = start();
+			array = start(array);
 			while(!found){
-				array = straightPath(path);
+				array = straightPath(path,array);
 				changeDirection();
 				if(rejected){
 					break;
@@ -43,7 +43,7 @@ public class HighwayConstructor {
 		return array;
 	}
 	
-	private int[][] start(){
+	private int[][] start(int[][] array){
 		Random rand = new Random();
 		int val; int val2;
 		//insertion of highways, codes 3 and 4
@@ -99,7 +99,7 @@ public class HighwayConstructor {
 				break;
 			}
 		}
-		array = straightPath(path);
+		array = straightPath(path,array);
 		return array;
 	}
 		/*
@@ -137,7 +137,7 @@ public class HighwayConstructor {
 		}
 	}
 	
-	private int[][] straightPath(Stack path){
+	private int[][] straightPath(Stack path,int[][] array){
 		int p1=0; int p2=0;
 		for(int x = 0; x < 1; x++){//change constant depending on how many tiles u wanna go
 			switch(dir){

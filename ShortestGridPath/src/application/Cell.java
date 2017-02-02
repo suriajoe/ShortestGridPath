@@ -54,7 +54,26 @@ public class Cell extends AnchorPane
     {
     	this.type = t;
     }
+    
+    public int getColumn()
+    {
+    	return this.column;
+    }
+    
+    public void setColumn(int col)
+    {
+    	this.column = col;
+    }
+    
+    public int getRow()
+    {
+    	return this.row;
+    }
 
+    public void setRow(int r)
+    {
+    	this.row = r;
+    }
     public void highlight() 
     {
         // ensure the style is only once in the style list
@@ -71,10 +90,8 @@ public class Cell extends AnchorPane
 
     public void hoverHighlight() 
     {
-        // ensure the style is only once in the style list
         getStyleClass().remove("cell-hover-highlight");
 
-        // add style
         getStyleClass().add("cell-hover-highlight");
     }
 
