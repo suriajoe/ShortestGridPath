@@ -39,7 +39,7 @@ public class Controller extends Pane
     int rows = 120;
     int columns = 160;
     int value = 1;
-    int type = 0;
+    int type = 1;
     
     double width = 1200;
     double height = 670;
@@ -87,10 +87,17 @@ public class Controller extends Pane
         int roughCount = 0;
         int roughCoordinateX = 15;
         int roughCoordinateY = 15;
-        int rough1;
+        int rough1;					//will be set to random number(0 or 1) to create 50% rough terrain
         
-        int[][] rarray = new int[120][160];
-        int[][] blockedArray = new int[120][160];  //delete since Cell object contains value,type
+        int[][] rarray = new int[120][160]; //rows = 120, cols = 160
+        int[][] blockedArray = new int[120][160]; 
+        for(int i=0;i<120;i++)
+        {
+        	for(int j=0;j<160;j++)
+        	{
+        		blockedArray[i][j]=1;
+        	}
+        }
         
         while(roughCount < 8)
         {
@@ -123,9 +130,9 @@ public class Controller extends Pane
     			    mouse.roughColor(grid.roughCell(roughCoordinateX-i,roughCoordinateY-j));
     			    if((roughCoordinateX-i) >= 0 && (roughCoordinateY-j) >= 0 && (roughCoordinateX-i) < 160 && (roughCoordinateY-j) < 160)
     			    {
-    			    	blockedArray[roughCoordinateY-j][roughCoordinateX-i] = 1;
+    			    	blockedArray[roughCoordinateY-j][roughCoordinateX-i] = 2;
     			    	grid.getCell(roughCoordinateX-i, roughCoordinateY-j).setValue(2);
-    			    	grid.getCell(roughCoordinateX-i, roughCoordinateY-j).setType(1);
+    			    	grid.getCell(roughCoordinateX-i, roughCoordinateY-j).setType(2);
     			    }
     			  }
     		    }
@@ -136,9 +143,9 @@ public class Controller extends Pane
     			    mouse.roughColor(grid.roughCell(roughCoordinateX-i,roughCoordinateY+(j-15)));
     			    if((roughCoordinateX-i)>=0 && (roughCoordinateY+(j-15)) >=0 && ((roughCoordinateX-i) < 160) && (roughCoordinateY+(j-15) < 120))
     			    {
-    			    	blockedArray[roughCoordinateY+(j-15)][roughCoordinateX-i] = 1;
+    			    	blockedArray[roughCoordinateY+(j-15)][roughCoordinateX-i] = 2;
     			    	grid.getCell(roughCoordinateX-i, roughCoordinateY+(j-15)).setValue(2);
-    			    	grid.getCell(roughCoordinateX-i, roughCoordinateY+(j-15)).setType(1);
+    			    	grid.getCell(roughCoordinateX-i, roughCoordinateY+(j-15)).setType(2);
     			    }
     			  }
     		    }		  
@@ -149,9 +156,9 @@ public class Controller extends Pane
     			    mouse.roughColor(grid.roughCell(roughCoordinateX+(i-15),roughCoordinateY-j));
     			    if((roughCoordinateX+(i-15))>=0 && (roughCoordinateY-j) >=0 && ((roughCoordinateX+(i-15)) < 160) && (roughCoordinateY-j) < 120)
     			    {
-    			    	blockedArray[roughCoordinateY-j][roughCoordinateX+(i-15)] = 1;
+    			    	blockedArray[roughCoordinateY-j][roughCoordinateX+(i-15)] = 2;
     			    	grid.getCell(roughCoordinateX+(i-15), roughCoordinateY-j).setValue(2);
-    			    	grid.getCell(roughCoordinateX+(i-15), roughCoordinateY-j).setType(1);
+    			    	grid.getCell(roughCoordinateX+(i-15), roughCoordinateY-j).setType(2);
     			    }
     			  }
     		    }  
@@ -162,9 +169,9 @@ public class Controller extends Pane
     			    mouse.roughColor(grid.roughCell(roughCoordinateX+(i-15),roughCoordinateY+(j-15)));	 
     			    if((roughCoordinateX+(i-15))>=0 && (roughCoordinateY+(j-15)) >=0 && ((roughCoordinateX+(i-15)) < 160) && (roughCoordinateY+(j-15) < 120))
     			    {
-    			    	blockedArray[roughCoordinateY+(j-15)][roughCoordinateX+(i-15)] = 1;
+    			    	blockedArray[roughCoordinateY+(j-15)][roughCoordinateX+(i-15)] = 2;
     			    	grid.getCell(roughCoordinateX+(i-15), roughCoordinateY+(j-15)).setValue(2);
-    			    	grid.getCell(roughCoordinateX+(i-15), roughCoordinateY+(j-15)).setType(1);
+    			    	grid.getCell(roughCoordinateX+(i-15), roughCoordinateY+(j-15)).setType(2);
     			    }
     			  }
     		    }
@@ -176,8 +183,27 @@ public class Controller extends Pane
         }
         
         //Highway path
-        //HighwayConstructor highway = new HighwayConstructor(blockedArray);
-        //highway.construct(blockedArray);
+        HighwayConstructor highway = new HighwayConstructor(blockedArray);
+        highway.construct(blockedArray);    
+        for(int i=0;i<120;i++)
+        {
+        	for(int j=0;j<160;j++)
+        	{
+        		if(blockedArray[i][j] == 3)
+        		{
+        			grid.getCell(j,i).setType(3);
+        			grid.getCell(j,i).setValue(.25);
+        			grid.getCell(j,i).highwayColor();
+        		}
+        		else if(blockedArray[i][j] == 4)
+        		{
+        			grid.getCell(j,i).clean();
+        			grid.getCell(j,i).setType(4);
+        			grid.getCell(j,i).setValue(.50);
+        			grid.getCell(j,i).highwayColor();
+        		}
+        	}
+        }
         
         //Blocked Cells
         int xRand;
@@ -187,10 +213,11 @@ public class Controller extends Pane
         {
         	xRand = rand.nextInt(160);
         	yRand = rand.nextInt(120);
-        	if(grid.getCell(xRand, yRand).getType() != 1 || grid.getCell(xRand, yRand).getType() != 2)
+        	if(grid.getCell(xRand, yRand).getType() != 2 || grid.getCell(xRand, yRand).getType() != 0 
+        			|| grid.getCell(xRand, yRand).getType() != 3 || grid.getCell(xRand, yRand).getType() != 4)
         	{
 		    	grid.getCell(xRand, yRand).setValue(0);
-		    	grid.getCell(xRand, yRand).setType(2);
+		    	grid.getCell(xRand, yRand).setType(0);
         		grid.getCell(xRand, yRand).highlight();
         		blockedCount++;
         	}
@@ -246,12 +273,14 @@ public class Controller extends Pane
         	if(euclidean >= 100)
         	{
         		//X = col, Y = row
-        		if(grid.getCell(startX, startY).getType() !=2 || grid.getCell(startX, startY).getType() !=3)
+        		if(grid.getCell(startX, startY).getType() !=0 || grid.getCell(startX, startY).getType() !=5 
+        				|| grid.getCell(startX, startY).getType() !=3 || grid.getCell(startX, startY).getType() !=4)
         		{
-        			if(grid.getCell(goalX, goalY).getType() != 2 || grid.getCell(goalX, goalY).getType() !=3)
+        			if(grid.getCell(goalX, goalY).getType() != 0 || grid.getCell(goalX, goalY).getType() !=5
+        					|| grid.getCell(goalX, goalY).getType() !=3 || grid.getCell(goalX, goalY).getType() !=4)
         			{
-    			    	grid.getCell(startX, startY).setType(3);
-    			    	grid.getCell(goalX, goalY).setType(3);
+    			    	grid.getCell(startX, startY).setType(5);
+    			    	grid.getCell(goalX, goalY).setType(5);
             			mouse.startPoint(grid.getCell(startX, startY));
                         mouse.goalPoint(grid.getCell(goalX, goalY));
                         distance100 = false;

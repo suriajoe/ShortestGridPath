@@ -114,7 +114,7 @@ public class MouseGestures
     }
     public void roughColor(Node node)
     {
-    	if((Cell)node == null)
+    	if((Cell)node == null)//cell reached out of bounds
     	{
     		
     	}

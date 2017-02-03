@@ -5,8 +5,8 @@ public class Cell extends AnchorPane
 
     int column; //X coordinate
     int row;    //Y coordinate
-    int value;  //0=blocked
-    int type;   //0=empty,1=hard/rough,2=block,3=start/goal vertex,4=highway
+    double value;  //0=blocked,1=empty,2=hard/rough,0.25=empty(highway),0.5=rough(highway)
+    int type;      //0=blocked,1=empty,2=hard/rough,3=empty(highway),4=rough(highway),5=start/goal vertex
 
     public Cell(int column, int row) 
     {
@@ -16,14 +16,10 @@ public class Cell extends AnchorPane
         
         getStyleClass().add("cell");
 
-//      Label label = new Label(this.toString());
-//
-//      getChildren().add(label);
-
         setOpacity(0.9);
     }
     
-    public Cell(int column, int row, int value, int type)
+    public Cell(int column, int row, double value, int type)
     {
      	this.column = column;
      	this.row = row;
@@ -35,19 +31,19 @@ public class Cell extends AnchorPane
      	setOpacity(0.9);
     }
     
-    public int getValue()
+    public double getValue()
     {
     	return this.value;
     }
     
-    public void setValue(int v)
+    public void setValue(double v)
     {
     	this.value = v;
     }
     
     public int getType()
     {
-    	return this.value;
+    	return this.type;
     }
     
     public void setType(int t)
@@ -119,6 +115,10 @@ public class Cell extends AnchorPane
     public boolean isOccupied()
     {
     	return getStyleClass().isEmpty();
+    }
+    public void highwayColor()
+    {
+    	getStyleClass().add("cell-highway");
     }
 
     public String toString() 

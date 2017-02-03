@@ -18,5 +18,9 @@
 }
 
 .cell-hover-highlight {
-    -fx-background-color:derive(blue,0.7);
+    -fx-background-color:derive(blue,0.4);
+}
+
+.cell-highway{
+	-fx-background-color:derive(blue,0.9);
 }

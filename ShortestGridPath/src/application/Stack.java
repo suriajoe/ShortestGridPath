@@ -21,6 +21,7 @@ public class Stack {
 		}
 		Node tmp = top;
 		top = top.next;
+		size--;
 		return tmp;
 	}
 	
