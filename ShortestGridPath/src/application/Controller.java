@@ -4,7 +4,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -474,8 +473,8 @@ public class Controller extends Pane
 	      }
 	      
 	      int index=0;
-	      int sourceX=0;
-	      int sourceY=0;
+	      int sx=0;
+	      int sy=0;
 	      int destX;
 	      int destY;
 	      int hardArrayX[] = new int[8];
@@ -484,11 +483,35 @@ public class Controller extends Pane
 	      String sourceStr;
 	      String destStr;
 	      String hardStr;
-	      
+	      String temp = "";
+	      int tempX = 0;
 	      sourceStr = line.get(index);
 	      index++;
 	      destStr = line.get(index);
 	      
+	      for(int x=0;x<sourceStr.length();x++)
+	      {
+	    	  if(Character.isDigit(sourceStr.charAt(x)))
+	    		  temp = temp + (sourceStr.charAt(x)-'0');
+	    	  else
+	    	  {
+	    		  tempX = x;
+	    		  sx = Integer.parseInt(temp);
+	    		  x=sourceStr.length();
+	    	  }
+	      }
+	      for(int y=tempX+1;y<sourceStr.length();y++)
+	      {
+	    	  if(Character.isDigit(sourceStr.charAt(y)))
+	    		  temp = temp + (sourceStr.charAt(y)-'0');
+	    	  else
+	    	  {
+	    		  sy = Integer.parseInt(temp);
+	    		  y=sourceStr.length();
+	    	  }
+	      }
+	      
+	      /*
 	      if(Character.isDigit(sourceStr.charAt(0)))
 	    	 sourceX = sourceStr.charAt(0)-'0';	    	  
 	      if(Character.isDigit(sourceStr.charAt(1)))
@@ -504,6 +527,7 @@ public class Controller extends Pane
 	      else if(destStr.length() <= 2)
 	    	  if(Character.isDigit(destStr.charAt(2)))
 	    		  destY = destStr.charAt(2)-'0';
+	      */
 	      
 	      for(int i=0;i<8;i++)
 	      {
@@ -518,10 +542,10 @@ public class Controller extends Pane
 				     hardArrayY[i] = hardStr.charAt(0)-'0';	    	  
 	      }
 	      
-	      grid.getCell(sourceX, sourceY).setValue(1);
-	      grid.getCell(sourceX, sourceY).setType(5);
-	      mouse.startPoint(grid.getCell(sourceX, sourceY));
-	      mouse.goalPoint(grid.getCell(sourceX, sourceY));
+	      grid.getCell(sx, sy).setValue(1);
+	      grid.getCell(sx, sy).setType(5);
+	      mouse.startPoint(grid.getCell(sx, sy));
+	      //mouse.goalPoint(grid.getCell(sx, sy));
 	      
           list.getChildren().addAll(grid);      
     	}
