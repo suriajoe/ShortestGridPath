@@ -13,6 +13,7 @@ public class HighwayConstructor {
 	Stack path;
 	boolean found;
 	boolean rejected;
+	boolean started;
 	
 	public HighwayConstructor(int[][] array){
 		p1 = 0;
@@ -21,6 +22,7 @@ public class HighwayConstructor {
 		found = false;
 		rejected = false;
 		path = new Stack();
+		started = false;
 	}
 	
 	public int[][] construct(int[][] array){//calls all the methods written below to make the highway
@@ -39,10 +41,10 @@ public class HighwayConstructor {
 					found = true;
 				}
 			}
-			/*if (found && path.getSize() < 100){//found a boundry but it ain't long enough
+			if (found && path.getSize() < 100){//found a boundry but it ain't long enough
 				rejectPath(array);
 			}
-			*/
+			
 			path.clear();
 			if(rejected){
 				i--;
@@ -123,6 +125,7 @@ public class HighwayConstructor {
 			}
 		}
 		rejected = false;
+		started = true;
 		return array;
 	}
 		
@@ -164,7 +167,10 @@ public class HighwayConstructor {
 	}
 	
 	private int[][] straightPath(int[][] array){
-		for(int x = 0; x < 2; x++){//change constant depending on how many tiles u wanna go
+		for(int x = 0; x < 20; x++){//change constant depending on how many tiles u wanna go
+			if (started){
+				continue;
+			}
 			switch(dir){
 				case(0):{
 					//check for boundary
@@ -206,7 +212,7 @@ public class HighwayConstructor {
 				}
 				case(2):{
 					p2++;
-					if(p1>array.length-1||p1<0 || p2>=array[0].length-1||p2<0){//found a boundary
+					if(p1>array.length-1||p1<0 || p2>array[0].length-1||p2<0){//found a boundary
 						found = true;
 						break;
 					}
