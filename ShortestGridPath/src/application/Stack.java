@@ -46,6 +46,7 @@ public class Stack {
 	
 	public Node clear(){
 		top = null;
+		size = 0;
 		return top;
 	}
 	
