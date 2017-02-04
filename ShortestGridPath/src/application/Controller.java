@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -24,11 +25,13 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -52,6 +55,7 @@ public class Controller extends Pane
     double width = 1200;
     double height = 670;
     //Maybe make One Global Grid, or 6 Grid(1 for random, 5 for load from file)
+    //use list.getChildren.remove(grid[i]); grid=null  to clear it
     Grid grid;
     int sourceX;
     int sourceY;
@@ -84,7 +88,7 @@ public class Controller extends Pane
 			@Override
 			public void handle(ActionEvent event)
 			{
-				readFile();
+				readFile(mainStage);
 			}
 		});
 		
@@ -234,7 +238,7 @@ public class Controller extends Pane
 	        
 	        //Highway path
 	        HighwayConstructor highway = new HighwayConstructor(blockedArray);
-	        highway.construct(blockedArray);    
+	        blockedArray = highway.construct(blockedArray);    
 	        for(int i=0;i<120;i++)
 	        {
 	        	for(int j=0;j<160;j++)
@@ -330,7 +334,9 @@ public class Controller extends Pane
 	        					|| grid.getCell(goalX, goalY).getType() !=3 || grid.getCell(goalX, goalY).getType() !=4)
 	        			{
 	    			    	grid.getCell(startX, startY).setType(5);
+	    			    	grid.getCell(startX, startY).setValue(1);
 	    			    	grid.getCell(goalX, goalY).setType(5);
+	    			    	grid.getCell(startX, startY).setValue(1);
 	            			mouse.startPoint(grid.getCell(startX, startY));
 	                        mouse.goalPoint(grid.getCell(goalX, goalY));
 	                        sourceX = startX;
@@ -351,6 +357,7 @@ public class Controller extends Pane
 		  }
 	}
 	
+	//delete grid=null, use array of grid[] objects
 	public void flush()
 	{
 		list.getChildren().remove(grid);
@@ -423,8 +430,111 @@ public class Controller extends Pane
 	}
 	
 	//Load .txt and create grid from those coordinates
-	public void readFile()
+	public void readFile(Stage mainStage)
 	{
+	  try{
+    	FileChooser fileChooser = new FileChooser();
+    	FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Txt files (*.txt)", "*.txt");
+    	fileChooser.getExtensionFilters().add(extFilter);
+    	File file = fileChooser.showOpenDialog(mainStage);
+    	Path path = file.toPath();
+    	List<String> line;
+    	line = Files.readAllLines(path, Charset.forName("UTF-8"));
+		
+    	if(!line.isEmpty())
+    	{
+    	  //if successful and valid file, flush and create file
+    	  if(!list.getChildren().isEmpty())
+			flush();
+	      
+    	  // create grid
+    	  grid = new Grid(columns, rows, width, height);
+
+    	  MouseGestures mouse = new MouseGestures();
+	        
+    	  xCoor = new SimpleIntegerProperty(0);
+    	  yCoor = new SimpleIntegerProperty(0);
+    	  time = new SimpleIntegerProperty(0);
+    	  xInfo.textProperty().bind(xCoor.asString("x:%s"));
+    	  yInfo.textProperty().bind(yCoor.asString("y:%s"));
+    	  timeInfo.textProperty().bind(time.asString("time:%s ms"));
+	        
+	      // fill grid with empty cells
+	      for(int row = 0; row < rows; row++) 
+	      {
+	          for(int column = 0; column < columns; column++) 
+	          {
+
+	             Cell cell = new Cell(column, row, value, type);
+
+	             mouse.color(cell,xCoor,yCoor);  
+
+	             grid.add(cell, column, row);
+	          }
+	      }
+	      
+	      int index=0;
+	      int sourceX=0;
+	      int sourceY=0;
+	      int destX;
+	      int destY;
+	      int hardArrayX[] = new int[8];
+	      int hardArrayY[] = new int[8];
+	      boolean skipWhiteLine = true;
+	      String sourceStr;
+	      String destStr;
+	      String hardStr;
+	      
+	      sourceStr = line.get(index);
+	      index++;
+	      destStr = line.get(index);
+	      
+	      if(Character.isDigit(sourceStr.charAt(0)))
+	    	 sourceX = sourceStr.charAt(0)-'0';	    	  
+	      if(Character.isDigit(sourceStr.charAt(1)))
+	    	 sourceY = sourceStr.charAt(1)-'0';
+	      else if(sourceStr.length() <= 2)
+	    	  if(Character.isDigit(sourceStr.charAt(2)))
+	    		  sourceY = sourceStr.charAt(2)-'0';
+	      
+	      if(Character.isDigit(destStr.charAt(0)))
+	    	 destX = destStr.charAt(0)-'0';	    	  
+	      if(Character.isDigit(destStr.charAt(1)))
+	    	 destY = destStr.charAt(1)-'0';
+	      else if(destStr.length() <= 2)
+	    	  if(Character.isDigit(destStr.charAt(2)))
+	    		  destY = destStr.charAt(2)-'0';
+	      
+	      for(int i=0;i<8;i++)
+	      {
+	    	  hardStr=line.get(index);
+	    	  index++;
+		      if(Character.isDigit(hardStr.charAt(0)))
+			     hardArrayX[i] = hardStr.charAt(0)-'0';	    	  
+			  if(Character.isDigit(hardStr.charAt(1)))
+				 hardArrayY[i] = hardStr.charAt(1)-'0';	    	  
+			  else if(hardStr.length() <= 2)
+			     if(Character.isDigit(hardStr.charAt(2)))
+				     hardArrayY[i] = hardStr.charAt(0)-'0';	    	  
+	      }
+	      
+	      grid.getCell(sourceX, sourceY).setValue(1);
+	      grid.getCell(sourceX, sourceY).setType(5);
+	      mouse.startPoint(grid.getCell(sourceX, sourceY));
+	      mouse.goalPoint(grid.getCell(sourceX, sourceY));
+	      
+          list.getChildren().addAll(grid);      
+    	}
+	   	        
+	  }
+	  catch(IOException i)
+	  {
+		i.printStackTrace();
+	  }
+	  catch(Exception e)
+	  {
+		e.printStackTrace();
+	  }
 		
 	}
 	
