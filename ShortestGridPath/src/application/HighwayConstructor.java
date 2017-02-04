@@ -35,10 +35,14 @@ public class HighwayConstructor {
 				if(rejected){
 					break;
 				}
+				if(p1>=array.length-1||p1<=0 || p2>=array[0].length-1||p2<=0){
+					found = true;
+				}
 			}
-			if (found && path.getSize() < 100){//found a boundry but it ain't long enough
+			/*if (found && path.getSize() < 100){//found a boundry but it ain't long enough
 				rejectPath(array);
 			}
+			*/
 			path.clear();
 			if(rejected){
 				i--;
@@ -76,6 +80,10 @@ public class HighwayConstructor {
 			case(1):{//start bottom row, direction 1 = up
 				p1 = array.length-1;//bottom row
 				p2 = rand.nextInt(array[0].length-2)+1;
+				if(array[p1][p2] == 3 || array[p1][p2] == 4){
+					rejected = true;
+					return array;
+				}
 				if (array[p1][p2] == 1){
 					array[p1][p2] = 3;
 				}else{
@@ -86,6 +94,10 @@ public class HighwayConstructor {
 			}
 			case(2):{//start on left column, direction 2 = right
 				p1 = rand.nextInt(array.length-2)+1;
+				if(array[p1][p2] == 3 || array[p1][p2] == 4){
+					rejected = true;
+					return array;
+				}
 				if (array[p1][p2] == 1){
 					array[p1][p2] = 3;
 				}else{
@@ -97,6 +109,10 @@ public class HighwayConstructor {
 			case(3):{//start on right column, direction 3 = left
 				p2 = array[0].length-1;
 				p1 = rand.nextInt(array.length-2)+1;
+				if(array[p1][p2] == 3 || array[p1][p2] == 4){
+					rejected = true;
+					return array;
+				}
 				if (array[p1][p2] == 1){
 					array[p1][p2] = 3;
 				}else{
@@ -134,7 +150,7 @@ public class HighwayConstructor {
 	}
 	
 	
-	private void rejectPath(int[][] array){
+	private int[][] rejectPath(int[][] array){
 		rejected = true;
 		while(!path.isEmpty()){
 			Node n = path.pop();
@@ -144,10 +160,11 @@ public class HighwayConstructor {
 				array[n.p1][n.p2] = 2;
 			}
 		}
+		return array;
 	}
 	
 	private int[][] straightPath(int[][] array){
-		for(int x = 0; x < 20; x++){//change constant depending on how many tiles u wanna go
+		for(int x = 0; x < 2; x++){//change constant depending on how many tiles u wanna go
 			switch(dir){
 				case(0):{
 					//check for boundary
@@ -166,6 +183,7 @@ public class HighwayConstructor {
 					}else{
 						array[p1][p2] = 4;
 					}
+					path.push(new Node(p1,p2,null));
 					break;
 				}
 				case(1):{
@@ -198,11 +216,10 @@ public class HighwayConstructor {
 					}
 					if (array[p1][p2] == 1){
 						array[p1][p2] = 3;
-						path.push(new Node(p1,p2,null));
 					}else{
 						array[p1][p2] = 4;
-						path.push(new Node(p1,p2,null));
 					}
+					path.push(new Node(p1,p2,null));
 					break;
 				}
 				case(3):{
