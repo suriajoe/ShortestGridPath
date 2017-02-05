@@ -1,3 +1,4 @@
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -10,7 +11,8 @@ public class MouseGestures
 {
     boolean showHoverCursor = true;
     
-    public void color(Node node, IntegerProperty xCoordinate, IntegerProperty yCoordinate) 
+    public void color(Node node, IntegerProperty xCoordinate, IntegerProperty yCoordinate,
+    		DoubleProperty fValue, DoubleProperty gValue, DoubleProperty hValue) 
     {
         if(showHoverCursor) 
         {
@@ -27,6 +29,9 @@ public class MouseGestures
                     	((Cell)node).hoverHighlight();
                     	xCoordinate.setValue(((Cell)node).getColumn());
                     	yCoordinate.setValue(((Cell)node).getRow());
+                    	fValue.setValue(((Cell)node).getF());
+                    	gValue.setValue(((Cell)node).getG());
+                    	gValue.setValue(((Cell)node).getH());
                     } 
                     else 
                     {

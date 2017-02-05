@@ -26,7 +26,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.AnchorPane;
@@ -44,9 +46,9 @@ public class Controller extends Pane
 	private IntegerProperty xCoor;
 	private IntegerProperty yCoor;	
 	private IntegerProperty time;
-	private IntegerProperty gInt;
-	private IntegerProperty fInt;	
-	private IntegerProperty hInt;
+	private DoubleProperty gInt;
+	private DoubleProperty fInt;	
+	private DoubleProperty hInt;
 	public static final Duration INDEFINITE = new Duration(Double.POSITIVE_INFINITY);
 	
     int rows = 120;
@@ -117,6 +119,12 @@ public class Controller extends Pane
 	        xCoor = new SimpleIntegerProperty(0);
 	        yCoor = new SimpleIntegerProperty(0);
 	        time = new SimpleIntegerProperty(0);
+	        fInt = new SimpleDoubleProperty(0);
+	        gInt = new SimpleDoubleProperty(0);
+	        hInt = new SimpleDoubleProperty(0);
+	        fInfo.textProperty().bind(fInt.asString("f:%s"));
+	        gInfo.textProperty().bind(gInt.asString("g:%s"));
+	        hInfo.textProperty().bind(hInt.asString("h:%s"));
 	        xInfo.textProperty().bind(xCoor.asString("x:%s"));
 	        yInfo.textProperty().bind(yCoor.asString("y:%s"));
 	        timeInfo.textProperty().bind(time.asString("time:%s ms"));
@@ -129,7 +137,7 @@ public class Controller extends Pane
 
 	                Cell cell = new Cell(column, row, value, type);
 
-	                mouse.color(cell,xCoor,yCoor);  
+	                mouse.color(cell,xCoor,yCoor,fInt,gInt,hInt);  
 
 	                grid.add(cell, column, row);
 	            }
@@ -462,12 +470,18 @@ public class Controller extends Pane
 
     	  MouseGestures mouse = new MouseGestures();
 	        
-    	  xCoor = new SimpleIntegerProperty(0);
-    	  yCoor = new SimpleIntegerProperty(0);
-    	  time = new SimpleIntegerProperty(0);
-    	  xInfo.textProperty().bind(xCoor.asString("x:%s"));
-    	  yInfo.textProperty().bind(yCoor.asString("y:%s"));
-    	  timeInfo.textProperty().bind(time.asString("time:%s ms"));
+	        xCoor = new SimpleIntegerProperty(0);
+	        yCoor = new SimpleIntegerProperty(0);
+	        time = new SimpleIntegerProperty(0);
+	        fInt = new SimpleDoubleProperty(0);
+	        gInt = new SimpleDoubleProperty(0);
+	        hInt = new SimpleDoubleProperty(0);
+	        fInfo.textProperty().bind(fInt.asString("f:%s"));
+	        gInfo.textProperty().bind(gInt.asString("g:%s"));
+	        hInfo.textProperty().bind(hInt.asString("h:%s"));
+	        xInfo.textProperty().bind(xCoor.asString("x:%s"));
+	        yInfo.textProperty().bind(yCoor.asString("y:%s"));
+	        timeInfo.textProperty().bind(time.asString("time:%s ms"));
 	        
 	      // fill grid with empty cells
 	      for(int row = 0; row < rows; row++) 
@@ -477,7 +491,7 @@ public class Controller extends Pane
 
 	             Cell cell = new Cell(column, row, value, type);
 
-	             mouse.color(cell,xCoor,yCoor);  
+	                mouse.color(cell,xCoor,yCoor,fInt,gInt,hInt);  
 
 	             grid.add(cell, column, row);
 	          }
@@ -576,15 +590,8 @@ public class Controller extends Pane
 	}
 	
 	public void path()
-	{
-        fInt = new SimpleIntegerProperty(0);
-        gInt = new SimpleIntegerProperty(0);
-        hInt = new SimpleIntegerProperty(0);
-        fInfo.textProperty().bind(fInt.asString("f:%s"));
-        gInfo.textProperty().bind(gInt.asString("g:%s"));
-        hInfo.textProperty().bind(hInt.asString("h:%s"));
+	{       
         
-        grid.compareF(grid.getCell(0, 0), grid.getCell(1, 1));
 	}
 	
 	/*Create a thread that sets a timer when path starts, stop timer when goal reached
