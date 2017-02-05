@@ -1,6 +1,7 @@
 import java.util.Random;
 
 public class HighwayConstructor {
+	int i;
 	int p1;
 	int p2;
 	int dir;
@@ -10,10 +11,12 @@ public class HighwayConstructor {
 	 * dir 2 = right
 	 * dir 3 = left
 	 */
-	Stack path;
+	//Stack path;
 	boolean found;
 	boolean rejected;
 	boolean started;
+	int attempts;
+	Stack[] path;
 	
 	public HighwayConstructor(int[][] array){
 		p1 = 0;
@@ -21,12 +24,21 @@ public class HighwayConstructor {
 		dir = 0;
 		found = false;
 		rejected = false;
-		path = new Stack();
+		path = new Stack[4];
 		started = false;
+		attempts = 0;
 	}
 	
 	public int[][] construct(int[][] array){//calls all the methods written below to make the highway
-		for(int i=0; i<4; i++){
+		for(i=0; i<4; i++){
+			if (attempts > 10){
+				for(i=0; i<4; i++){
+					rejectPath(array);
+				}
+				i=-1;
+				continue;
+			}
+			path[i] = new Stack();
 			found = false;
 			do{
 				array = start(array);
@@ -41,11 +53,13 @@ public class HighwayConstructor {
 					found = true;
 				}
 			}
-			if (found && path.getSize() < 100){//found a boundry but it ain't long enough
+			if (found && path[i].getSize() < 100){//found a boundary but it ain't long enough
 				rejectPath(array);
 			}
-			
-			path.clear();
+			if(found){
+				attempts = 0;
+			}
+			//path[i].clear();
 			if(rejected){
 				i--;
 				rejected = false;
@@ -76,7 +90,7 @@ public class HighwayConstructor {
 				}else{
 					array[p1][p2] = 4;
 				}
-				path.push(new Node(p1,p2,null));
+				path[i].push(new Node(p1,p2,null));
 				break;
 			}
 			case(1):{//start bottom row, direction 1 = up
@@ -91,7 +105,7 @@ public class HighwayConstructor {
 				}else{
 					array[p1][p2] = 4;
 				}
-				path.push(new Node(p1,p2,null));
+				path[i].push(new Node(p1,p2,null));
 				break;
 			}
 			case(2):{//start on left column, direction 2 = right
@@ -105,7 +119,7 @@ public class HighwayConstructor {
 				}else{
 					array[p1][p2] = 4;
 				}
-				path.push(new Node(p1,p2,null));
+				path[i].push(new Node(p1,p2,null));
 				break;
 			}
 			case(3):{//start on right column, direction 3 = left
@@ -120,7 +134,7 @@ public class HighwayConstructor {
 				}else{
 					array[p1][p2] = 4;
 				}
-				path.push(new Node(p1,p2,null));
+				path[i].push(new Node(p1,p2,null));
 				break;
 			}
 		}
@@ -148,15 +162,16 @@ public class HighwayConstructor {
 			case(1): dir = 3; break;
 			case(2): dir = 1; break;
 			case(3): dir = 0; break;
-		}
+			}
 		}
 	}
 	
 	
 	private int[][] rejectPath(int[][] array){
 		rejected = true;
-		while(!path.isEmpty()){
-			Node n = path.pop();
+		attempts++;
+		while(!path[i].isEmpty()){
+			Node n = path[i].pop();
 			if(array[n.p1][n.p2] == 3){
 				array[n.p1][n.p2] = 1;
 			}else{
@@ -189,7 +204,7 @@ public class HighwayConstructor {
 					}else{
 						array[p1][p2] = 4;
 					}
-					path.push(new Node(p1,p2,null));
+					path[i].push(new Node(p1,p2,null));
 					break;
 				}
 				case(1):{
@@ -207,7 +222,7 @@ public class HighwayConstructor {
 					}else{
 						array[p1][p2] = 4;
 					}
-					path.push(new Node(p1,p2,null));
+					path[i].push(new Node(p1,p2,null));
 					break;
 				}
 				case(2):{
@@ -225,7 +240,7 @@ public class HighwayConstructor {
 					}else{
 						array[p1][p2] = 4;
 					}
-					path.push(new Node(p1,p2,null));
+					path[i].push(new Node(p1,p2,null));
 					break;
 				}
 				case(3):{
@@ -243,7 +258,7 @@ public class HighwayConstructor {
 					}else{
 						array[p1][p2] = 4;
 					}
-					path.push(new Node(p1,p2,null));
+					path[i].push(new Node(p1,p2,null));
 					break;
 				}
 			}
