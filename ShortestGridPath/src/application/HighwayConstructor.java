@@ -53,9 +53,10 @@ public class HighwayConstructor {
 					found = true;
 				}
 			}
-			if (found && path[i].getSize() < 100){//found a boundary but it ain't long enough
+			/*if (found && path[i].getSize() < 100){//found a boundary but it ain't long enough
 				rejectPath(array);
 			}
+			 */
 			if(found){
 				attempts = 0;
 			}
@@ -182,7 +183,7 @@ public class HighwayConstructor {
 	}
 	
 	private int[][] straightPath(int[][] array){
-		for(int x = 0; x < 20; x++){//change constant depending on how many tiles u wanna go
+		for(int x = 0; x < 10; x++){//change constant depending on how many tiles u wanna go
 			if (started){
 				continue;
 			}
