@@ -75,16 +75,16 @@ public class Grid extends Pane
     		return c2;  	
     }
 	*/
-     /*Unhighlight all cells
-    public void unhighlight() 
+     //Unhighlight all cells
+    public void hoverUnhighlight() 
     {
         for( int row=0; row < rows; row++) 
         {
             for( int col=0; col < columns; col++) 
             {
-                cells[row][col].unhighlight();
+                cells[row][col].hoverUnhighlight();
             }
         }
     }
-    */
+    
 }

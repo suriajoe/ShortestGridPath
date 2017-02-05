@@ -26,16 +26,16 @@ public class MouseGestures
 
                     if(newValue) 
                     {
-                    	((Cell)node).hoverHighlight();
+                    	//((Cell)node).hoverHighlight();
                     	xCoordinate.setValue(((Cell)node).getColumn());
                     	yCoordinate.setValue(((Cell)node).getRow());
                     	fValue.setValue(((Cell)node).getF());
                     	gValue.setValue(((Cell)node).getG());
-                    	gValue.setValue(((Cell)node).getH());
+                    	hValue.setValue(((Cell)node).getH());
                     } 
                     else 
                     {
-                    	((Cell)node).hoverUnhighlight();
+                    	//((Cell)node).hoverUnhighlight();
                     }
 
                     //for( String s: node.getStyleClass())

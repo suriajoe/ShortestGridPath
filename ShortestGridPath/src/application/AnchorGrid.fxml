@@ -4,6 +4,7 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
@@ -11,15 +12,18 @@
       <AnchorPane fx:id="list" layoutY="80.0" prefHeight="620.0" prefWidth="1200.0" />
       <Button fx:id="saveGrid" layoutX="115.0" layoutY="14.0" mnemonicParsing="false" text="Save Grid" />
       <Button fx:id="loadGrid" layoutX="202.0" layoutY="14.0" mnemonicParsing="false" text="Load Grid" />
-      <Label layoutX="689.0" layoutY="19.0" prefHeight="16.0" prefWidth="54.0" text="x:" fx:id="xInfo" />
-      <Label fx:id="yInfo" layoutX="754.0" layoutY="19.0" prefHeight="16.0" prefWidth="54.0" text="y:" />
-      <Label fx:id="gInfo" layoutX="818.0" layoutY="19.0" prefHeight="16.0" prefWidth="86.0" text="g:" />
-      <Label fx:id="hInfo" layoutX="914.0" layoutY="19.0" prefHeight="16.0" prefWidth="86.0" text="h:" />
-      <Label fx:id="fInfo" layoutX="1008.0" layoutY="19.0" prefHeight="16.0" prefWidth="86.0" text="f:" />
+      <Label layoutX="962.0" layoutY="47.0" prefHeight="16.0" prefWidth="44.0" text="x:" fx:id="xInfo" />
+      <Label fx:id="yInfo" layoutX="1006.0" layoutY="47.0" prefHeight="16.0" prefWidth="51.0" text="y:" />
+      <Label fx:id="gInfo" layoutX="14.0" layoutY="47.0" prefHeight="16.0" prefWidth="314.0" text="g:" />
+      <Label fx:id="hInfo" layoutX="329.0" layoutY="47.0" prefHeight="16.0" prefWidth="314.0" text="h:" />
+      <Label fx:id="fInfo" layoutX="648.0" layoutY="47.0" prefHeight="16.0" prefWidth="314.0" text="f:" />
       <Label fx:id="timeInfo" layoutX="1103.0" layoutY="19.0" prefHeight="16.0" prefWidth="86.0" text="time:" />
-      <ChoiceBox fx:id="fiveMaps" layoutX="535.0" layoutY="14.0" prefHeight="26.0" prefWidth="140.0" />
+      <ChoiceBox fx:id="fiveMaps" layoutX="955.0" layoutY="14.0" prefHeight="26.0" prefWidth="140.0" />
       <Button fx:id="createGrid" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" text="Create Grid" />
-      <ComboBox fx:id="tenPoints" layoutX="402.0" layoutY="14.0" prefHeight="26.0" prefWidth="125.0" />
+      <ComboBox fx:id="tenPoints" layoutX="736.0" layoutY="14.0" prefHeight="26.0" prefWidth="125.0" />
       <Button fx:id="startPath" layoutX="289.0" layoutY="14.0" mnemonicParsing="false" text="Start Path" />
+      <TextField fx:id="aWeight" layoutX="456.0" layoutY="14.0" />
+      <Label layoutX="378.0" layoutY="19.0" text="A* weight" />
+      <Button fx:id="uniform" layoutX="618.0" layoutY="14.0" mnemonicParsing="false" text="Uniform" />
    </children>
 </AnchorPane>

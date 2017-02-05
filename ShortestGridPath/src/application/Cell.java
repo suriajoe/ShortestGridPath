@@ -10,6 +10,8 @@ public class Cell extends AnchorPane
     double f; 
     double g;
     double h;
+    Node parent = null;
+    Cell cell = null;
 
     public Cell(int column, int row) 
     {
@@ -28,6 +30,7 @@ public class Cell extends AnchorPane
      	this.row = row;
      	this.value = value;
      	this.type = type;
+     	this.g = 2147483647;
      	
      	getStyleClass().add("cell");
      	
@@ -79,9 +82,9 @@ public class Cell extends AnchorPane
     	return this.f;
     }
 
-    public void setF(double f)
+    public void setF()
     {
-    	this.f = f;
+    	this.f = getG()+getH();
     }
     public double getG()
     {
@@ -100,6 +103,18 @@ public class Cell extends AnchorPane
     public void setH(double h)
     {
     	this.h = h;
+    }
+    public void add(Node node)
+    {
+    	this.parent = node;
+    }
+    public void removeNode(Node node)
+    {
+    	this.parent = null;
+    }
+    public Node peek()
+    {
+    	return this.parent;
     }
     public void highlight() 
     {
