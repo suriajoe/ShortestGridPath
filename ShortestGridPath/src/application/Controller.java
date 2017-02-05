@@ -484,6 +484,7 @@ public class Controller extends Pane
 	      String destStr;
 	      String hardStr;
 	      String temp = "";
+	      String tempT = "";
 	      int tempX = 0;
 	      sourceStr = line.get(index);
 	      index++;
@@ -503,10 +504,10 @@ public class Controller extends Pane
 	      for(int y=tempX+1;y<sourceStr.length();y++)
 	      {
 	    	  if(Character.isDigit(sourceStr.charAt(y)))
-	    		  temp = temp + (sourceStr.charAt(y)-'0');
+	    		  tempT = tempT + (sourceStr.charAt(y)-'0');
 	    	  else
 	    	  {
-	    		  sy = Integer.parseInt(temp);
+	    		  sy = Integer.parseInt(tempT);
 	    		  y=sourceStr.length();
 	    	  }
 	      }
