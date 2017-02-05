@@ -17,8 +17,9 @@
       <Label fx:id="hInfo" layoutX="914.0" layoutY="19.0" prefHeight="16.0" prefWidth="86.0" text="h:" />
       <Label fx:id="fInfo" layoutX="1008.0" layoutY="19.0" prefHeight="16.0" prefWidth="86.0" text="f:" />
       <Label fx:id="timeInfo" layoutX="1103.0" layoutY="19.0" prefHeight="16.0" prefWidth="86.0" text="time:" />
-      <ChoiceBox fx:id="fiveMaps" layoutX="525.0" layoutY="14.0" prefWidth="150.0" />
+      <ChoiceBox fx:id="fiveMaps" layoutX="535.0" layoutY="14.0" prefHeight="26.0" prefWidth="140.0" />
       <Button fx:id="createGrid" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" text="Create Grid" />
-      <ComboBox fx:id="tenPoints" layoutX="291.0" layoutY="14.0" prefWidth="150.0" />
+      <ComboBox fx:id="tenPoints" layoutX="402.0" layoutY="14.0" prefHeight="26.0" prefWidth="125.0" />
+      <Button fx:id="startPath" layoutX="289.0" layoutY="14.0" mnemonicParsing="false" text="Start Path" />
    </children>
 </AnchorPane>
