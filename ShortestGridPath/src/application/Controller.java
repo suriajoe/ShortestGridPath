@@ -38,7 +38,7 @@ public class Controller extends Pane
 {
 
 	@FXML private AnchorPane list;
-	@FXML Button saveGrid, loadGrid, createGrid; 
+	@FXML Button saveGrid, loadGrid, createGrid, startPath; 
 	@FXML Label xInfo,yInfo,gInfo,fInfo,hInfo,timeInfo;
 	
 	private IntegerProperty xCoor;
@@ -88,6 +88,14 @@ public class Controller extends Pane
 			public void handle(ActionEvent event)
 			{
 				readFile(mainStage);
+			}
+		});
+		
+		startPath.setOnAction(new EventHandler<ActionEvent>(){
+			@Override
+			public void handle(ActionEvent event)
+			{
+				path();
 			}
 		});
 		
@@ -507,6 +515,7 @@ public class Controller extends Pane
 	    		  tempT = tempT + (sourceStr.charAt(y)-'0');
 	    	  else
 	    	  {
+	    		  tempX =y;
 	    		  sy = Integer.parseInt(tempT);
 	    		  y=sourceStr.length();
 	    	  }
@@ -560,6 +569,11 @@ public class Controller extends Pane
 	  {
 		e.printStackTrace();
 	  }
+		
+	}
+	
+	public void path()
+	{
 		
 	}
 	
