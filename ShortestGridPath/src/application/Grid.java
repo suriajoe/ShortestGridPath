@@ -47,6 +47,9 @@ public class Grid extends Pane
 
     public Cell getCell(int column, int row) 
     {
+    	if(column > this.columns || column < 0 || row > this.rows || row < 0)
+    		return null;
+    	
         return cells[row][column];
     }
     public Cell roughCell(int column, int row)
@@ -58,7 +61,7 @@ public class Grid extends Pane
     	else 
     		return cells[row][column];
     }
-    
+    /*
     public Cell compareF(Cell c1, Cell c2)
     {
     	double fFunction1;
@@ -71,7 +74,7 @@ public class Grid extends Pane
     	else
     		return c2;  	
     }
-
+	*/
      /*Unhighlight all cells
     public void unhighlight() 
     {

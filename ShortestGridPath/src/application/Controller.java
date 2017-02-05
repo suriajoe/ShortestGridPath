@@ -4,8 +4,10 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Random;
 
 import javafx.animation.Animation;
@@ -255,8 +257,8 @@ public class Controller extends Pane
 	        }
 	        
 	        //Highway path
-	        HighwayConstructor highway = new HighwayConstructor(blockedArray);
-	        blockedArray = highway.construct(blockedArray);    
+	        //HighwayConstructor highway = new HighwayConstructor(blockedArray);
+	        //blockedArray = highway.construct(blockedArray);    
 	        for(int i=0;i<120;i++)
 	        {
 	        	for(int j=0;j<160;j++)
@@ -590,8 +592,209 @@ public class Controller extends Pane
 	}
 	
 	public void path()
-	{       
+	{      
+		Comparator<Cell> comparator = new CellCompare();
+        PriorityQueue<Cell> path = new PriorityQueue<Cell>(200,comparator);
+        LinkedList<Cell> parentList = new LinkedList<Cell>();
         
+        Cell goal = grid.getCell(destX, destY);
+        Cell s;
+        Cell sPrime;
+        int l, m;
+        int currentX, currentY;//present cell
+        int eucX;//euclidean dis
+        int eucY;
+        int heuristicCost = 0;//HeuristicCost
+        int finalCost = 0; //g+h
+        int costVH = 1;
+        double costD = Math.sqrt(2);
+        int roughCostVH = 2;
+        double roughCostD = Math.sqrt(8);
+        double emptyRoughCostVH = 1.5;
+        double emptyRoughCostD = ((Math.sqrt(2)+Math.sqrt(8))/2);
+        double euclideanDistance;			
+        //heuristic
+        grid.getCell(sourceX, sourceY).setG(0);
+        parentList.add(grid.getCell(sourceX, sourceY));
+        path.add(grid.getCell(sourceX, sourceY));
+        boolean closed[][] = new boolean[120][160];
+
+        
+        while(!path.isEmpty())
+        {
+        	s=path.poll();
+        	s.hoverUnhighlight();
+        	if(s == goal)
+        	{
+        		System.out.println("path found");
+        		break;
+        	}
+            currentX = s.getColumn();
+            currentY = s.getRow();
+            
+            //pos 4
+            if(currentX-1>=0){
+            	sPrime = grid.getCell(currentX-1, currentY);
+    			eucX=(goal.getColumn()+1)-(sPrime.getColumn()+1);
+    			eucY=(goal.getRow()+1)-(sPrime.getRow()+1);
+    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
+            	if(s.getType() == 2 && sPrime.getType() == 2)
+            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
+            	else if(s.getType() == 2 || sPrime.getType() == 2)
+            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
+            	else
+            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList);
+            	//pos 7
+                if(currentY-1>=0){                      
+                	sPrime = grid.getCell(currentX-1, currentY-1);
+        			eucX=(goal.getColumn()+1)-(sPrime.getColumn()+1);
+        			eucY=(goal.getRow()+1)-(sPrime.getRow()+1);
+        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
+                	if(s.getType() == 2 && sPrime.getType() == 2)
+                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
+                	else if(s.getType() == 2 || sPrime.getType() == 2)
+                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
+                	else
+                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
+                }
+                //pos 1
+                if(currentY+1<120){
+                	sPrime = grid.getCell(currentX-1, currentY+1);
+        			eucX=(goal.getColumn()+1)-(sPrime.getColumn()+1);
+        			eucY=(goal.getRow()+1)-(sPrime.getRow()+1);
+        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
+                	if(s.getType() == 2 && sPrime.getType() == 2)
+                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
+                	else if(s.getType() == 2 || sPrime.getType() == 2)
+                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
+                	else
+                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList);
+                }
+            } 
+            //pos 2
+            if(currentY-1>=0){
+            	sPrime = grid.getCell(currentX, currentY-1);
+    			eucX=(goal.getColumn()+1)-(sPrime.getColumn()+1);
+    			eucY=(goal.getRow()+1)-(sPrime.getRow()+1);
+    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
+            	if(s.getType() == 2 && sPrime.getType() == 2)
+            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
+            	else if(s.getType() == 2 || sPrime.getType() == 2)
+            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
+            	else
+            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList);
+            }
+            //pos 8
+            if(currentY+1<120){
+            	sPrime = grid.getCell(currentX, currentY+1);
+    			eucX=(goal.getColumn()+1)-(sPrime.getColumn()+1);
+    			eucY=(goal.getRow()+1)-(sPrime.getRow()+1);
+    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
+            	if(s.getType() == 2 && sPrime.getType() == 2)
+            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
+            	else if(s.getType() == 2 || sPrime.getType() == 2)
+            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
+            	else
+            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList); 
+            }
+            //pos 6
+            if(currentX+1<160){
+            	sPrime = grid.getCell(currentX+1, currentY);
+    			eucX=(goal.getColumn()+1)-(sPrime.getColumn()+1);
+    			eucY=(goal.getRow()+1)-(sPrime.getRow()+1);
+    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
+            	if(s.getType() == 2 && sPrime.getType() == 2)
+            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
+            	else if(s.getType() == 2 || sPrime.getType() == 2)
+            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
+            	else
+            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList); 
+            	//pos 9
+                if(currentY-1>=0){
+                	sPrime = grid.getCell(currentX+1, currentY-1);
+        			eucX=(goal.getColumn()+1)-(sPrime.getColumn()+1);
+        			eucY=(goal.getRow()+1)-(sPrime.getRow()+1);
+        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
+                	if(s.getType() == 2 && sPrime.getType() == 2)
+                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
+                	else if(s.getType() == 2 || sPrime.getType() == 2)
+                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
+                	else
+                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
+                }
+                //pos 3
+                if(currentY+1<120){
+                	sPrime = grid.getCell(currentX+1, currentY+1);
+        			eucX=(goal.getColumn()+1)-(sPrime.getColumn()+1);
+        			eucY=(goal.getRow()+1)-(sPrime.getRow()+1);
+        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
+                	if(s.getType() == 2 && sPrime.getType() == 2)
+                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
+                	else if(s.getType() == 2 || sPrime.getType() == 2)
+                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
+                	else
+                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
+                }  
+            }
+        }
+            /*
+            for(l=i-1; l<=i+1; l++)
+            {
+                for(m=j-1; m<=j-1; m++)
+                {
+                	if(grid.getCell(l, m) != null || grid.getCell(l, m).getType() == 0)
+                	{
+                		if(!closed.contains(grid.getCell(l, m)) && !path.contains(grid.getCell(l, m)))
+                		{
+                			eucX=(s.getColumn()+1)-(grid.getCell(l, m).getColumn()+1);
+                			eucY=(s.getRow()+1)-(grid.getCell(l, m).getRow()+1);
+                			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2)); //distance between s and s'
+                			if(grid.getCell(l, m).getType() == 2)
+                				grid.getCell(l, m).setH(euclideanDistance+1);
+                			else
+                				grid.getCell(l, m).setH(euclideanDistance);
+                			grid.getCell(l, m).setG(s.getG()+);         		//g(s')=g(s)+cost(s->s')
+                		}
+                		else if(path.contains(grid.getCell(l, m)))
+                		{
+                			
+                		}
+                    		   
+                      if(array[l][m]>=path.peek())
+                      {
+                         return(FALSE);                            
+                      }
+                      return(TRUE);
+                    }
+                }
+                
+            }
+            */
+        
+        
+        //q.add(new Entry(strings.get(x), calculateStringValue(strings.get(x))));
+	}
+
+	public void updateVertex(Cell s, Cell sPrime, double cost, double heuristicCost,boolean[][] closed
+							,PriorityQueue<Cell> fringe,LinkedList<Cell> parent)
+	{
+		//closed[120][160]
+		if(sPrime == null || sPrime.getType() == 0 || closed[sPrime.getRow()][sPrime.getColumn()]== true)
+			return;
+		double fCost = heuristicCost+cost;
+		sPrime.setH(heuristicCost);
+		sPrime.setG(cost);
+		//sPrime.setF(heuristicCost+cost);
+		
+		if(!fringe.contains(sPrime) || sPrime.getF()>fCost)
+		{
+			sPrime.setF(fCost);
+			fringe.add(sPrime);
+			parent.add(sPrime);
+			sPrime.hoverHighlight();
+			closed[sPrime.getRow()][sPrime.getColumn()] = true;
+		}
+		
 	}
 	
 	/*Create a thread that sets a timer when path starts, stop timer when goal reached
