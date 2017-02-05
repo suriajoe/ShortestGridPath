@@ -58,6 +58,19 @@ public class Grid extends Pane
     	else 
     		return cells[row][column];
     }
+    
+    public Cell compareF(Cell c1, Cell c2)
+    {
+    	double fFunction1;
+    	double fFunction2;
+
+    	fFunction1 = c1.getG() + c1.getH();
+    	fFunction2 = c2.getG() + c2.getH();
+    	if(fFunction1 < fFunction2)
+    		return c1;
+    	else
+    		return c2;  	
+    }
 
      /*Unhighlight all cells
     public void unhighlight() 

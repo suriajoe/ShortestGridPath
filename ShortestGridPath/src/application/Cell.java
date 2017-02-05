@@ -7,6 +7,9 @@ public class Cell extends AnchorPane
     int row;    //Y coordinate
     double value;  //0=blocked,1=empty,2=hard/rough,0.25=empty(highway),0.5=rough(highway)
     int type;      //0=blocked,1=empty,2=hard/rough,3=empty(highway),4=rough(highway),5=start/goal vertex
+    double f; 
+    double g;
+    double h;
 
     public Cell(int column, int row) 
     {
@@ -69,6 +72,34 @@ public class Cell extends AnchorPane
     public void setRow(int r)
     {
     	this.row = r;
+    }
+    
+    public double getF()
+    {
+    	return this.f;
+    }
+
+    public void setF(double f)
+    {
+    	this.f = f;
+    }
+    public double getG()
+    {
+    	return this.g;
+    }
+
+    public void setG(double g)
+    {
+    	this.g = g;
+    }
+    public double getH()
+    {
+    	return this.h;
+    }
+
+    public void setH(double h)
+    {
+    	this.h = h;
     }
     public void highlight() 
     {

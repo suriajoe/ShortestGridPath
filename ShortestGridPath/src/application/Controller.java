@@ -44,6 +44,9 @@ public class Controller extends Pane
 	private IntegerProperty xCoor;
 	private IntegerProperty yCoor;	
 	private IntegerProperty time;
+	private IntegerProperty gInt;
+	private IntegerProperty fInt;	
+	private IntegerProperty hInt;
 	public static final Duration INDEFINITE = new Duration(Double.POSITIVE_INFINITY);
 	
     int rows = 120;
@@ -574,7 +577,14 @@ public class Controller extends Pane
 	
 	public void path()
 	{
-		
+        fInt = new SimpleIntegerProperty(0);
+        gInt = new SimpleIntegerProperty(0);
+        hInt = new SimpleIntegerProperty(0);
+        fInfo.textProperty().bind(fInt.asString("f:%s"));
+        gInfo.textProperty().bind(gInt.asString("g:%s"));
+        hInfo.textProperty().bind(hInt.asString("h:%s"));
+        
+        grid.compareF(grid.getCell(0, 0), grid.getCell(1, 1));
 	}
 	
 	/*Create a thread that sets a timer when path starts, stop timer when goal reached
