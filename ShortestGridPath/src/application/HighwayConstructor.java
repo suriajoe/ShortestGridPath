@@ -31,7 +31,7 @@ public class HighwayConstructor {
 	
 	public int[][] construct(int[][] array){//calls all the methods written below to make the highway
 		for(i=0; i<4; i++){
-			if (attempts > 10){
+			if (attempts > 15){
 				for(i=0; i<4; i++){
 					rejectPath(array);
 				}
