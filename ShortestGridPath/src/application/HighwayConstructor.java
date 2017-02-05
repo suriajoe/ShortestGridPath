@@ -31,7 +31,7 @@ public class HighwayConstructor {
 	
 	public int[][] construct(int[][] array){//calls all the methods written below to make the highway
 		for(i=0; i<4; i++){
-			if (attempts > 10){
+			if (attempts > 15){
 				for(i=0; i<4; i++){
 					rejectPath(array);
 				}
@@ -183,8 +183,9 @@ public class HighwayConstructor {
 	}
 	
 	private int[][] straightPath(int[][] array){
-		for(int x = 0; x < 10; x++){//change constant depending on how many tiles u wanna go
+		for(int x = 0; x < 2; x++){//change constant depending on how many tiles u wanna go
 			if (started){
+				started = false;
 				continue;
 			}
 			switch(dir){
