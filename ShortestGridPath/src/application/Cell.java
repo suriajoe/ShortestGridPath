@@ -167,9 +167,17 @@ public class Cell extends AnchorPane
     {
         getStyleClass().add("cell-start");
     }
+    public void startClean() 
+    {
+        getStyleClass().remove("cell-start");
+    }
     public void goal() 
     {
         getStyleClass().add("cell-goal");
+    }
+    public void goalClean() 
+    {
+        getStyleClass().remove("cell-goal");
     }
     public void brown()
     {
