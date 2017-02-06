@@ -306,14 +306,15 @@ public class Controller extends Pane
 	        }
 	        
 	        //Highway path
-	        //HighwayConstructor highway = new HighwayConstructor(blockedArray);
-	        //blockedArray = highway.construct(blockedArray);    
+	        HighwayConstructor highway = new HighwayConstructor(blockedArray);
+	        blockedArray = highway.construct(blockedArray);    
 	        for(int i=0;i<120;i++)
 	        {
 	        	for(int j=0;j<160;j++)
 	        	{
 	        		if(blockedArray[i][j] == 3)
 	        		{
+	        			grid.getCell(j,i).clean();
 	        			grid.getCell(j,i).setType(3);
 	        			grid.getCell(j,i).setValue(.25);
 	        			grid.getCell(j,i).highwayColor();

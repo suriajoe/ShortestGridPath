@@ -119,7 +119,7 @@ public class Cell extends AnchorPane
     public void highlight() 
     {
         // ensure the style is only once in the style list
-        getStyleClass().remove("cell-highlight");
+        //getStyleClass().remove("cell-highlight");
 
         // add style
         getStyleClass().add("cell-highlight");
@@ -128,6 +128,18 @@ public class Cell extends AnchorPane
     public void unhighlight() 
     {
         getStyleClass().remove("cell-highlight");
+    }
+    
+    public void hover()
+    {
+        getStyleClass().remove("cell-hover");
+
+        getStyleClass().add("cell-hover");
+    }
+    public void unhover()
+    {
+        getStyleClass().remove("cell-hover");
+
     }
 
     public void hoverHighlight() 

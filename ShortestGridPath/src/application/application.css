@@ -24,3 +24,7 @@
 .cell-highway{
 	-fx-background-color:derive(blue,0.9);
 }
+
+.cell-hover{
+	-fx-background-color:derive(yellow,0.9);
+}

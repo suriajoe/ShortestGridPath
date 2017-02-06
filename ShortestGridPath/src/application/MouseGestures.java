@@ -26,7 +26,7 @@ public class MouseGestures
 
                     if(newValue) 
                     {
-                    	((Cell)node).hoverHighlight();
+                    	((Cell)node).hover();
                     	xCoordinate.setValue(((Cell)node).getColumn());
                     	yCoordinate.setValue(((Cell)node).getRow());
                     	fValue.setValue(((Cell)node).getF());
@@ -35,7 +35,7 @@ public class MouseGestures
                     } 
                     else 
                     {
-                    	((Cell)node).hoverUnhighlight();
+                    	((Cell)node).unhover();
                     }
 
                     //for( String s: node.getStyleClass())
