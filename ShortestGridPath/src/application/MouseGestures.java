@@ -26,7 +26,7 @@ public class MouseGestures
 
                     if(newValue) 
                     {
-                    	//((Cell)node).hoverHighlight();
+                    	((Cell)node).hoverHighlight();
                     	xCoordinate.setValue(((Cell)node).getColumn());
                     	yCoordinate.setValue(((Cell)node).getRow());
                     	fValue.setValue(((Cell)node).getF());
@@ -35,7 +35,7 @@ public class MouseGestures
                     } 
                     else 
                     {
-                    	//((Cell)node).hoverUnhighlight();
+                    	((Cell)node).hoverUnhighlight();
                     }
 
                     //for( String s: node.getStyleClass())
@@ -45,67 +45,8 @@ public class MouseGestures
             });
         }
 
-        //node.setOnMousePressed(onMousePressedEventHandler);
-        //node.setOnDragDetected(onDragDetectedEventHandler);
-        //node.setOnMouseDragEntered(onMouseDragEnteredEventHandler);
-
     }
     
-    /*
-    EventHandler<MouseEvent> onMousePressedEventHandler = event -> {
-
-        Cell cell = (Cell) event.getSource();
-
-        if(event.isPrimaryButtonDown()) 
-        {
-            cell.highlight();
-        } 
-        else if(event.isSecondaryButtonDown()) 
-        {
-            cell.unhighlight();
-        }
-    };
-
-    EventHandler<MouseEvent> onMouseDraggedEventHandler = event -> {
-
-        PickResult pickResult = event.getPickResult();
-        Node node = pickResult.getIntersectedNode();
-
-        if( node instanceof Cell) {
-
-            Cell cell = (Cell) node;
-
-            if(event.isPrimaryButtonDown()) 
-            {
-                cell.highlight();
-            } 
-            else if(event.isSecondaryButtonDown()) 
-            {
-                cell.unhighlight();
-            }
-
-        }
-
-    };       
-    EventHandler<MouseEvent> onDragDetectedEventHandler = event -> {
-
-        Cell cell = (Cell) event.getSource();
-        cell.startFullDrag();
-
-    };
-
-    EventHandler<MouseEvent> onMouseDragEnteredEventHandler = event -> {
-
-        Cell cell = (Cell) event.getSource();
-
-        if( event.isPrimaryButtonDown()) {
-            cell.highlight();
-        } else if( event.isSecondaryButtonDown()) {
-            cell.unhighlight();
-        }
-
-    };
-    */
     
     public void startPoint(Node node)
     {

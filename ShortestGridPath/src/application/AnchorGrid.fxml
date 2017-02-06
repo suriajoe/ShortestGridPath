@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import java.lang.String?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
    <children>
@@ -20,7 +21,7 @@
       <Label fx:id="timeInfo" layoutX="1103.0" layoutY="19.0" prefHeight="16.0" prefWidth="86.0" text="time:" />
       <ChoiceBox fx:id="fiveMaps" layoutX="955.0" layoutY="14.0" prefHeight="26.0" prefWidth="140.0" />
       <Button fx:id="createGrid" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" text="Create Grid" />
-      <ComboBox fx:id="tenPoints" layoutX="736.0" layoutY="14.0" prefHeight="26.0" prefWidth="125.0" />
+      <ChoiceBox fx:id="tenPoints" layoutX="736.0" layoutY="14.0" prefHeight="26.0" prefWidth="125.0" />
       <Button fx:id="startPath" layoutX="289.0" layoutY="14.0" mnemonicParsing="false" text="Start Path" />
       <TextField fx:id="aWeight" layoutX="456.0" layoutY="14.0" />
       <Label layoutX="378.0" layoutY="19.0" text="A* weight" />

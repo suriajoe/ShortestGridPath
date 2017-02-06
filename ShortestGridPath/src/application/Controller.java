@@ -25,6 +25,7 @@ import javafx.geometry.Orientation;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -46,6 +47,8 @@ public class Controller extends Pane
 	@FXML Button saveGrid, loadGrid, createGrid, startPath, uniform; 
 	@FXML Label xInfo,yInfo,gInfo,fInfo,hInfo,timeInfo;
 	@FXML TextField aWeight;
+	@FXML ChoiceBox<String> fiveMaps,tenPoints;
+	//Name="tenpoints" IsEditable="True" IsReadOnly="True" Text="10 Points"
 	
 	private IntegerProperty xCoor;
 	private IntegerProperty yCoor;	
@@ -65,12 +68,14 @@ public class Controller extends Pane
     //Maybe make One Global Grid, or 6 Grid(1 for random, 5 for load from file)
     //use list.getChildren.remove(grid[i]); grid=null  to clear it
     Grid grid;
+    Grid fiveGrids[];
     int sourceX;
     int sourceY;
     int destX;
     int destY;
     int roughArrayX[] = new int[8];
     int roughArrayY[] = new int[8];
+    int timeCounter = 0;
     
 	public void start(Stage mainStage)
 	{
@@ -79,7 +84,7 @@ public class Controller extends Pane
 			public void handle(ActionEvent event){
 				if(!list.getChildren().isEmpty())
 					flush();
-				CreateGrid();
+				CreateGrid(10);
 			}
 		});
 		
@@ -126,17 +131,39 @@ public class Controller extends Pane
 				pathWeighted(d);
 			}
 		});
-			
+	    fiveMaps.getItems().addAll("Map 1","Map 2","Map 3","Map 4","Map 5");
+		fiveMaps.getSelectionModel().selectedIndexProperty().addListener(new
+									 ChangeListener<Number>()
+		{
+				public void changed(ObservableValue ov, Number value, Number new_value) 
+				{
+					CreateGrid(new_value.intValue());
+				}
+		});
+	    
+	    tenPoints.getItems().addAll("Point 1","Point 2","Point 3","Point 4","Point 5"
+	    		,"Point 6","Point 7","Point 8","Point 9","Point 10");
+
+		tenPoints.getSelectionModel().selectedIndexProperty().addListener(new
+				 ChangeListener<Number>()
+		{
+			public void changed(ObservableValue ov, Number value, Number new_value) 
+			{
+				CreateGrid((Integer)new_value);
+			}
+		});
 		
     }
 	
 	//Load Method to load file, and set up Gui 
 	
-	public void CreateGrid()
+	public void CreateGrid(int gridNum)
 	{
 		try{
-	        // create grid
-	        grid = new Grid(columns, rows, width, height);
+			if(gridNum == 10)
+				grid = new Grid(columns, rows, width, height);
+			else
+				fiveGrids[gridNum] = new Grid(columns,rows,width,height);
 
 	        MouseGestures mouse = new MouseGestures();
 	        
@@ -403,6 +430,9 @@ public class Controller extends Pane
 	public void flush()
 	{
 		list.getChildren().remove(grid);
+		int count = 0;
+		//while(count<5)
+			//list.getChildren().remove(fiveGrids[5]);
 		grid = null;
 	}
 	
@@ -524,6 +554,8 @@ public class Controller extends Pane
 	      int index=0;
 	      int sx=0;
 	      int sy=0;
+	      int dx=0;
+	      int dy=0;
 	      int destX;
 	      int destY;
 	      int hardArrayX[] = new int[8];
@@ -546,22 +578,30 @@ public class Controller extends Pane
 	    	  else
 	    	  {
 	    		  tempX = x;
-	    		  sx = Integer.parseInt(temp);
+	    		  sx = Integer.parseInt(temp.trim());
 	    		  x=sourceStr.length();
 	    	  }
 	      }
-	      for(int y=tempX+1;y<sourceStr.length();y++)
+	      int comma = sourceStr.indexOf(",");
+	      tempT = sourceStr.substring(comma+1);
+		  sy = Integer.parseInt(tempT.trim());
+		  
+	      for(int x=0;x<destStr.length();x++)
 	      {
-	    	  if(Character.isDigit(sourceStr.charAt(y)))
-	    		  tempT = tempT + (sourceStr.charAt(y)-'0');
+	    	  if(Character.isDigit(destStr.charAt(x)))
+	    		  temp = temp + (destStr.charAt(x)-'0');
 	    	  else
 	    	  {
-	    		  tempX =y;
-	    		  sy = Integer.parseInt(tempT);
-	    		  y=sourceStr.length();
+	    		  tempX = x;
+	    		  dx = Integer.parseInt(temp.trim());
+	    		  x=sourceStr.length();
 	    	  }
 	      }
-	      
+	      comma = sourceStr.indexOf(",");
+	      temp = sourceStr.substring(comma+1);
+		  dy = Integer.parseInt(temp.trim());
+
+		  
 	      /*
 	      if(Character.isDigit(sourceStr.charAt(0)))
 	    	 sourceX = sourceStr.charAt(0)-'0';	    	  
@@ -595,8 +635,10 @@ public class Controller extends Pane
 	      
 	      grid.getCell(sx, sy).setValue(1);
 	      grid.getCell(sx, sy).setType(5);
+	      grid.getCell(dx, dy).setValue(1);	
+	      grid.getCell(dx, dy).setType(5);
 	      mouse.startPoint(grid.getCell(sx, sy));
-	      //mouse.goalPoint(grid.getCell(sx, sy));
+	      mouse.goalPoint(grid.getCell(dx, dy));
 	      
           list.getChildren().addAll(grid);      
     	}
@@ -621,9 +663,9 @@ public class Controller extends Pane
         
         grid.hoverUnhighlight();
         Cell goal = grid.getCell(destX, destY);
-        Cell s;
+        Cell s = grid.getCell(sourceX, sourceY);
         Cell sPrime;
-        int l, m;
+        timeCounter = 0;
         int currentX, currentY;//present cell
         int eucX;//euclidean dis
         int eucY;
@@ -764,6 +806,10 @@ public class Controller extends Pane
                 }  
             }
         }
+        if(s != goal)
+        {
+        	System.out.println("No Path Found");
+        }
         
         double totalCost = 0;
         double cellTotal = 0;
@@ -779,6 +825,7 @@ public class Controller extends Pane
         }
         System.out.println("AStar Euclidean Heuristic TotalCost: " + totalCost);
         System.out.println("AStar Euclidean Heuristic cell cost total: " + cellTotal);
+        System.out.println("Number of cells traversed: " + timeCounter);
         grid.getCell(sourceX, sourceY).hoverUnhighlight();
         grid.getCell(destX, destY).hoverUnhighlight();
 	}
@@ -804,7 +851,7 @@ public class Controller extends Pane
 			sPrime.setG(cost);
 			sPrime.setF();
 			fringe.add(sPrime);
-
+			timeCounter++;
 			sPrime.cell=s;			
 			//sPrime.hoverHighlight();
 			closed[sPrime.getRow()][sPrime.getColumn()] = true;
@@ -820,9 +867,9 @@ public class Controller extends Pane
         
         grid.hoverUnhighlight();
         Cell goal = grid.getCell(destX, destY);
-        Cell s;
+        Cell s = grid.getCell(sourceX, sourceY);
         Cell sPrime;
-        int l, m;
+        timeCounter = 0;
         int currentX, currentY;//present cell
         int eucX;//euclidean dis
         int eucY;
@@ -963,6 +1010,10 @@ public class Controller extends Pane
                 }  
             }
         }
+        if(s != goal)
+        {
+        	System.out.println("No Path Found");
+        }
         
         double totalCost = 0;
         double cellTotal = 0;
@@ -978,6 +1029,7 @@ public class Controller extends Pane
         }
         System.out.println("Uniform Search TotalCost: " + totalCost);
         System.out.println("Uniform Search cell cost total: " + cellTotal);
+        System.out.println("Number of cells traversed: " + timeCounter);
         
         grid.getCell(sourceX, sourceY).hoverUnhighlight();
         grid.getCell(destX, destY).hoverUnhighlight();
@@ -1004,7 +1056,7 @@ public class Controller extends Pane
 			sPrime.setG(cost);
 			sPrime.setF();
 			fringe.add(sPrime);
-
+			timeCounter++;
 			sPrime.cell=s;			
 			//sPrime.hoverHighlight();
 			closed[sPrime.getRow()][sPrime.getColumn()] = true;
@@ -1019,9 +1071,9 @@ public class Controller extends Pane
         
         grid.hoverUnhighlight();
         Cell goal = grid.getCell(destX, destY);
-        Cell s;
+        Cell s = grid.getCell(sourceX, sourceY);
         Cell sPrime;
-        int l, m;
+        timeCounter = 0;
         int currentX, currentY;//present cell
         int eucX;//euclidean dis
         int eucY;
@@ -1162,6 +1214,10 @@ public class Controller extends Pane
                 }  
             }
         }
+        if(s != goal)
+        {
+        	System.out.println("No Path Found");
+        }
         
         double totalCost = 0;
         double cellTotal = 0;
@@ -1177,6 +1233,7 @@ public class Controller extends Pane
         }
         System.out.println("Weighted Euclidean TotalCost: " + totalCost);
         System.out.println("Weighted cell cost total: " + cellTotal);
+        System.out.println("Number of cells traversed: " + timeCounter);
         grid.getCell(sourceX, sourceY).hoverUnhighlight();
         grid.getCell(destX, destY).hoverUnhighlight();
 	}
@@ -1202,7 +1259,7 @@ public class Controller extends Pane
 			sPrime.setG(cost);
 			sPrime.setF();
 			fringe.add(sPrime);
-
+			timeCounter++;
 			sPrime.cell=s;			
 			//sPrime.hoverHighlight();
 			closed[sPrime.getRow()][sPrime.getColumn()] = true;
