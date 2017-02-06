@@ -86,6 +86,10 @@ public class Cell extends AnchorPane
     {
     	this.f = getG()+getH();
     }
+    public void setFZero()
+    {
+    	this.f = 0;
+    }
     public double getG()
     {
     	return this.g;
@@ -145,6 +149,7 @@ public class Cell extends AnchorPane
     public void hoverHighlight() 
     {
         getStyleClass().remove("cell-hover-highlight");
+        getStyleClass().remove("cell-highway");
 
         getStyleClass().add("cell-hover-highlight");
     }

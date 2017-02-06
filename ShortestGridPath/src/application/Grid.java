@@ -82,7 +82,14 @@ public class Grid extends Pane
         {
             for( int col=0; col < columns; col++) 
             {
+        		if(cells[row][col].getType() == 3 || cells[row][col].getType() == 4)
+        		{
+        			cells[row][col].highwayColor();
+        		}
                 cells[row][col].hoverUnhighlight();
+                cells[row][col].setG(2147483647);
+                cells[row][col].setH(0);
+                cells[row][col].setFZero();
             }
         }
     }

@@ -53,10 +53,9 @@ public class HighwayConstructor {
 					found = true;
 				}
 			}
-			/*if (found && path[i].getSize() < 100){//found a boundary but it ain't long enough
+			if (found && path[i].getSize() < 100){//found a boundary but it ain't long enough
 				rejectPath(array);
 			}
-			 */
 			if(found){
 				attempts = 0;
 			}

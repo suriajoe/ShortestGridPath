@@ -18,7 +18,7 @@
 }
 
 .cell-hover-highlight {
-    -fx-background-color:derive(blue,0.4);
+    -fx-background-color:derive(orange,0.4);
 }
 
 .cell-highway{
@@ -26,5 +26,5 @@
 }
 
 .cell-hover{
-	-fx-background-color:derive(yellow,0.9);
+	-fx-background-color:derive(yellow,0.1);
 }
