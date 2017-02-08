@@ -10,25 +10,16 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Random;
 
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
-import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -109,8 +100,6 @@ public class Controller extends Pane
 			@Override
 			public void handle(ActionEvent event)
 			{
-				//if(grid != null)
-				//	cleanHighway();
 				path();
 			}
 		});
@@ -119,8 +108,6 @@ public class Controller extends Pane
 			@Override
 			public void handle(ActionEvent event)
 			{
-				//if(grid != null)
-				//	cleanHighway();
 				uniformCost();
 			}
 		});
@@ -131,8 +118,6 @@ public class Controller extends Pane
 			{
 				String str = aWeight.getText();
 				double d = Double.parseDouble(str);
-				//if(grid != null)
-					//cleanHighway();
 				pathWeighted(d);
 			}
 		});
@@ -234,7 +219,6 @@ public class Controller extends Pane
 	        {
 	            for (int column = 0; column < columns; column++) 
 	            {
-
 	                Cell cell = new Cell(column, row, value, type);
 
 	                mouse.color(cell,xCoor,yCoor,fInt,gInt,hInt);  
@@ -242,9 +226,6 @@ public class Controller extends Pane
 	                grid.add(cell, column, row);
 	            }
 	        }
-
-	        //If I addAll(grid) twice will i get conflicts
-	        //list.getChildren().addAll(grid);
 	        
 	        //list.getChildren().add(index, element);
 	        Random rand = new Random();
@@ -294,7 +275,7 @@ public class Controller extends Pane
 	    	    {
 	    		  for(int j=0;j<32;j++)
 	    		  { 		   	
-	    		    rough1 = rand.nextInt(2);  // random generator
+	    		    rough1 = rand.nextInt(2);  // 50%
 	    		    if(i<15 && j<15)
 	    		    { 
 	    			  if(rough1 == 0)
@@ -719,7 +700,6 @@ public class Controller extends Pane
         int currentX, currentY;//present cell
         int eucX;//euclidean dis
         int eucY;
-        int heuristicCost = 0;//HeuristicCost
         int finalCost = 0; //g+h
         int costVH = 1;
         double costD = Math.sqrt(2);
@@ -730,9 +710,14 @@ public class Controller extends Pane
         double costVHWay = 0.25;
         double roughVHWay = 0.5;
         double emptyRoughVHWay = 0.375;
-        double euclideanDistance;			
-        //heuristic
+        double euclideanDistance;				//heuristic
+        
         grid.getCell(sourceX, sourceY).setG(0);
+		eucX=(s.getColumn()+1)-(goal.getColumn()+1);
+		eucY=(s.getRow()+1)-(goal.getRow()+1);
+		euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
+        s.setH(euclideanDistance);
+        s.setF();
         parentList.add(grid.getCell(sourceX, sourceY));
         path.add(grid.getCell(sourceX, sourceY));
         boolean closed[][] = new boolean[120][160];
@@ -765,11 +750,11 @@ public class Controller extends Pane
             	else if(s.getType() == 2 || sPrime.getType() == 2)
             		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
             	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance,closed,path,parentList);
+            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
             	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance,closed,path,parentList);          		
+            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
             	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance,closed,path,parentList);          		
+            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList);          		
             	else
             		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList);
             	//pos 7
@@ -810,11 +795,11 @@ public class Controller extends Pane
             	else if(s.getType() == 2 || sPrime.getType() == 2)
             		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
             	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance,closed,path,parentList);
+            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
             	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance,closed,path,parentList);          		
+            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
             	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance,closed,path,parentList); 
+            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
             	else
             		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList);
             }
@@ -829,11 +814,11 @@ public class Controller extends Pane
             	else if(s.getType() == 2 || sPrime.getType() == 2)
             		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
             	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance,closed,path,parentList);
+            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
             	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance,closed,path,parentList);          		
+            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
             	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance,closed,path,parentList); 
+            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
             	else
             		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList); 
             }
@@ -848,11 +833,11 @@ public class Controller extends Pane
             	else if(s.getType() == 2 || sPrime.getType() == 2)
             		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
             	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance,closed,path,parentList);
+            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
             	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance,closed,path,parentList);          		
+            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
             	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance,closed,path,parentList); 
+            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
             	else
             		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList); 
             	//pos 9
@@ -892,8 +877,10 @@ public class Controller extends Pane
         double cellTotal = 0;
         if(pathFound == true)
         {
+        	grid.pathIsColored.add(s);
         	while(goal.cell != null)
         	{	
+        		grid.pathIsColored.add(goal.cell);
         		goal.hoverHighlight();
         		totalCost = totalCost + goal.getF();
         		cellTotal = cellTotal + goal.getValue();
@@ -964,6 +951,8 @@ public class Controller extends Pane
         double euclideanDistance;			
         //heuristic
         grid.getCell(sourceX, sourceY).setG(0);
+        s.setH(0);
+        s.setF();
         parentList.add(grid.getCell(sourceX, sourceY));
         path.add(grid.getCell(sourceX, sourceY));
         boolean closed[][] = new boolean[120][160];
@@ -988,9 +977,6 @@ public class Controller extends Pane
             //pos 4
             if(currentX-1>=0){
             	sPrime = grid.getCell(currentX-1, currentY);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
             	if(s.getType() == 2 && sPrime.getType() == 2)
             		updateVertexUnifrom(s,sPrime,s.getF()+roughCostVH,closed,path,parentList);
             	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -1000,9 +986,6 @@ public class Controller extends Pane
             	//pos 7
                 if(currentY-1>=0){                      
                 	sPrime = grid.getCell(currentX-1, currentY-1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
                 	if(s.getType() == 2 && sPrime.getType() == 2)
                 		updateVertexUnifrom(s,sPrime,s.getF()+roughCostD,closed,path,parentList);
                 	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -1019,9 +1002,6 @@ public class Controller extends Pane
                 //pos 1
                 if(currentY+1<120){
                 	sPrime = grid.getCell(currentX-1, currentY+1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
                 	if(s.getType() == 2 && sPrime.getType() == 2)
                 		updateVertexUnifrom(s,sPrime,s.getF()+roughCostD,closed,path,parentList);
                 	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -1033,9 +1013,6 @@ public class Controller extends Pane
             //pos 2
             if(currentY-1>=0){
             	sPrime = grid.getCell(currentX, currentY-1);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
             	if(s.getType() == 2 && sPrime.getType() == 2)
             		updateVertexUnifrom(s,sPrime,s.getF()+roughCostVH,closed,path,parentList);
             	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -1052,9 +1029,6 @@ public class Controller extends Pane
             //pos 8
             if(currentY+1<120){
             	sPrime = grid.getCell(currentX, currentY+1);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
             	if(s.getType() == 2 && sPrime.getType() == 2)
             		updateVertexUnifrom(s,sPrime,s.getF()+roughCostVH,closed,path,parentList);
             	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -1071,9 +1045,6 @@ public class Controller extends Pane
             //pos 6
             if(currentX+1<160){
             	sPrime = grid.getCell(currentX+1, currentY);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
             	if(s.getType() == 2 && sPrime.getType() == 2)
             		updateVertexUnifrom(s,sPrime,s.getF()+roughCostVH,closed,path,parentList);
             	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -1089,9 +1060,6 @@ public class Controller extends Pane
             	//pos 9
                 if(currentY-1>=0){
                 	sPrime = grid.getCell(currentX+1, currentY-1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
                 	if(s.getType() == 2 && sPrime.getType() == 2)
                 		updateVertexUnifrom(s,sPrime,s.getF()+roughCostD,closed,path,parentList);
                 	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -1102,9 +1070,6 @@ public class Controller extends Pane
                 //pos 3
                 if(currentY+1<120){
                 	sPrime = grid.getCell(currentX+1, currentY+1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
                 	if(s.getType() == 2 && sPrime.getType() == 2)
                 		updateVertexUnifrom(s,sPrime,s.getF()+roughCostD,closed,path,parentList);
                 	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -1123,8 +1088,10 @@ public class Controller extends Pane
         double cellTotal = 0;
         if(pathFound == true)
         {
+        	grid.pathIsColored.add(s);
         	while(goal.cell != null)
         	{	
+        		grid.pathIsColored.add(goal.cell);
         		goal.hoverHighlight();
         		totalCost = totalCost + goal.getF();
         		cellTotal = cellTotal + goal.getValue();
@@ -1354,8 +1321,10 @@ public class Controller extends Pane
         double cellTotal = 0;
         if(pathFound == true)
         {
+        	grid.pathIsColored.add(s);
         	while(goal.cell != null)
         	{	
+        		grid.pathIsColored.add(goal.cell);
         		goal.hoverHighlight();
         		totalCost = totalCost + goal.getF();
         		cellTotal = cellTotal + goal.getValue();
@@ -1585,8 +1554,10 @@ public class Controller extends Pane
         double cellTotal = 0;
         if(pathFound == true)
         {
+        	grid.pathIsColored.add(s);
         	while(goal.cell != null)
         	{	
+        		grid.pathIsColored.add(goal.cell);
         		goal.hoverHighlight();
         		totalCost = totalCost + goal.getF();
         		cellTotal = cellTotal + goal.getValue();
@@ -1677,9 +1648,6 @@ public class Controller extends Pane
                 //pos 4
                 if(currentX-1>=0){
                 	sPrime = grid.getCell(currentX-1, currentY);
-        			//eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			//eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			//euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
                 	if(s.getType() == 2 && sPrime.getType() == 2)
                 		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
                 	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -1708,9 +1676,6 @@ public class Controller extends Pane
                     //pos 1
                     if(currentY+1<120){
                     	sPrime = grid.getCell(currentX-1, currentY+1);
-            			//eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-            			//eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-            			//euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
                     	if(s.getType() == 2 && sPrime.getType() == 2)
                     		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
                     	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -1722,9 +1687,6 @@ public class Controller extends Pane
                 //pos 2
                 if(currentY-1>=0){
                 	sPrime = grid.getCell(currentX, currentY-1);
-        			//eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			//eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			//euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
                 	if(s.getType() == 2 && sPrime.getType() == 2)
                 		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
                 	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -1741,9 +1703,6 @@ public class Controller extends Pane
                 //pos 8
                 if(currentY+1<120){
                 	sPrime = grid.getCell(currentX, currentY+1);
-        			//eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			//eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			//euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
                 	if(s.getType() == 2 && sPrime.getType() == 2)
                 		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
                 	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -1760,9 +1719,6 @@ public class Controller extends Pane
                 //pos 6
                 if(currentX+1<160){
                 	sPrime = grid.getCell(currentX+1, currentY);
-        			//eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			//eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			//euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
                 	if(s.getType() == 2 && sPrime.getType() == 2)
                 		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
                 	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -1778,9 +1734,6 @@ public class Controller extends Pane
                 	//pos 9
                     if(currentY-1>=0){
                     	sPrime = grid.getCell(currentX+1, currentY-1);
-            			//eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-            			//eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-            			//euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
                     	if(s.getType() == 2 && sPrime.getType() == 2)
                     		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
                     	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -1791,9 +1744,6 @@ public class Controller extends Pane
                     //pos 3
                     if(currentY+1<120){
                     	sPrime = grid.getCell(currentX+1, currentY+1);
-            			//eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-            			//eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-            			//euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
                     	if(s.getType() == 2 && sPrime.getType() == 2)
                     		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
                     	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -1811,8 +1761,10 @@ public class Controller extends Pane
             double cellTotal = 0;
             if(pathFound == true)
             {
+            	grid.pathIsColored.add(s);
             	while(goal.cell != null)
             	{	
+            		grid.pathIsColored.add(goal.cell);
             		goal.hoverHighlight();
             		totalCost = totalCost + goal.getF();
             		cellTotal = cellTotal + goal.getValue();
@@ -1821,7 +1773,7 @@ public class Controller extends Pane
             }
             
         System.out.println("Agent Distance Heuristic TotalCost: " + euclideanDistance);
-        System.out.println("AStar Euclidean Heuristic cell cost total: " + cellTotal);
+        System.out.println("Agent Distance Heuristic cell cost total: " + cellTotal);
         System.out.println("Number of cells traversed: " + timeCounter);
         grid.getCell(sourceX, sourceY).hoverUnhighlight();
         grid.getCell(destX, destY).hoverUnhighlight();
@@ -1858,7 +1810,7 @@ public class Controller extends Pane
         path.add(s);
         boolean closed[][] = new boolean[120][160];
         boolean pathFound = false;
-        
+        //time start
         while(!path.isEmpty())
         {
         	s=path.poll();
@@ -2008,21 +1960,23 @@ public class Controller extends Pane
         {
         	System.out.println("No Path Found");
         }
-        
+        //time end
         double totalCost = 0;
         double cellTotal = 0;
         if(pathFound == true)
         {
+        	grid.pathIsColored.add(s);
         	while(goal.cell != null)
         	{	
+        		grid.pathIsColored.add(goal.cell);
         		goal.hoverHighlight();
         		totalCost = totalCost + goal.getF();
         		cellTotal = cellTotal + goal.getValue();
         		goal=goal.cell;		
         	}
         }
-        System.out.println("AStar Euclidean Heuristic TotalCost: " + totalCost);
-        System.out.println("AStar Euclidean Heuristic cell cost total: " + cellTotal);
+        System.out.println("AStar Reverse Euclidean Heuristic TotalCost: " + totalCost);
+        System.out.println("AStar Reverse Euclidean Heuristic cell cost total: " + cellTotal);
         System.out.println("Number of cells traversed: " + timeCounter);
         grid.getCell(sourceX, sourceY).hoverUnhighlight();
         grid.getCell(destX, destY).hoverUnhighlight();
@@ -2083,8 +2037,6 @@ public class Controller extends Pane
         while(!path.isEmpty())
         {
         	s=path.poll();
-        	//parentList.poll();
-        	//s.hoverUnhighlight();
         	if(s == goal)
         	{
             	s.hoverUnhighlight();
@@ -2099,9 +2051,7 @@ public class Controller extends Pane
             //pos 4
             if(currentX-1>=0){
             	sPrime = grid.getCell(currentX-1, currentY);
-    			//eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			//eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			//euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
+
             	if(s.getType() == 2 && sPrime.getType() == 2)
             		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
             	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -2117,9 +2067,6 @@ public class Controller extends Pane
             	//pos 7
                 if(currentY-1>=0){                      
                 	sPrime = grid.getCell(currentX-1, currentY-1);
-        			//eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			//eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			//euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
                 	if(s.getType() == 2 && sPrime.getType() == 2)
                 		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
                 	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -2130,9 +2077,6 @@ public class Controller extends Pane
                 //pos 1
                 if(currentY+1<120){
                 	sPrime = grid.getCell(currentX-1, currentY+1);
-        			//eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			//eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			//euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
                 	if(s.getType() == 2 && sPrime.getType() == 2)
                 		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
                 	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -2144,9 +2088,6 @@ public class Controller extends Pane
             //pos 2
             if(currentY-1>=0){
             	sPrime = grid.getCell(currentX, currentY-1);
-    			//eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			//eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			//euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
             	if(s.getType() == 2 && sPrime.getType() == 2)
             		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
             	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -2163,9 +2104,6 @@ public class Controller extends Pane
             //pos 8
             if(currentY+1<120){
             	sPrime = grid.getCell(currentX, currentY+1);
-    			//eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			//eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			//euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
             	if(s.getType() == 2 && sPrime.getType() == 2)
             		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
             	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -2182,9 +2120,6 @@ public class Controller extends Pane
             //pos 6
             if(currentX+1<160){
             	sPrime = grid.getCell(currentX+1, currentY);
-    			//eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			//eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			//euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
             	if(s.getType() == 2 && sPrime.getType() == 2)
             		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
             	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -2200,9 +2135,6 @@ public class Controller extends Pane
             	//pos 9
                 if(currentY-1>=0){
                 	sPrime = grid.getCell(currentX+1, currentY-1);
-        			//eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			//eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			//euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
                 	if(s.getType() == 2 && sPrime.getType() == 2)
                 		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
                 	else if(s.getType() == 2 || sPrime.getType() == 2)
@@ -2213,10 +2145,7 @@ public class Controller extends Pane
                 //pos 3
                 if(currentY+1<120){
                 	sPrime = grid.getCell(currentX+1, currentY+1);
-        			//eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			//eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			//euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-                	if(s.getType() == 2 && sPrime.getType() == 2)
+                 	if(s.getType() == 2 && sPrime.getType() == 2)
                 		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
                 	else if(s.getType() == 2 || sPrime.getType() == 2)
                 		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
@@ -2232,6 +2161,7 @@ public class Controller extends Pane
         {
         	while(goal.cell != null)
         	{	
+            	grid.pathIsColored.add(s);
         		goal.hoverHighlight();
         		totalCost = totalCost + goal.getF();
         		cellTotal = cellTotal + goal.getValue();
@@ -2333,7 +2263,7 @@ public class Controller extends Pane
     			    	grid.getCell(sX, sY).setType(5);
     			    	grid.getCell(sX, sY).setValue(1);
     			    	grid.getCell(goalX, goalY).setType(5);
-    			    	grid.getCell(sX, sY).setValue(1);
+    			    	grid.getCell(goalX, goalY).setValue(1);
             			mouse.startPoint(grid.getCell(sX, sY));
                         mouse.goalPoint(grid.getCell(goalX, goalY));
                         sourceX = sX;
@@ -2341,11 +2271,11 @@ public class Controller extends Pane
                         destX = goalX;
                         destY = goalY;
                         distance100 = false;
-                        //list.getChildren().addAll(grid);
         			}      			
         		}
         	}
-        }     
+        }   
+        grid.hoverUnhighlight();
 	}
 	
 	public void cleanHighway()

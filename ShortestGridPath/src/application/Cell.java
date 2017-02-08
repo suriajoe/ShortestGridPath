@@ -123,7 +123,8 @@ public class Cell extends AnchorPane
     public void highlight() 
     {
         // ensure the style is only once in the style list
-        //getStyleClass().remove("cell-highlight");
+        getStyleClass().remove("cell-highlight");
+        getStyleClass().remove("cell-highway");
 
         // add style
         getStyleClass().add("cell-highlight");
@@ -145,7 +146,7 @@ public class Cell extends AnchorPane
         getStyleClass().remove("cell-hover");
 
     }
-
+    /*Path */
     public void hoverHighlight() 
     {
         getStyleClass().remove("cell-hover-highlight");
@@ -153,7 +154,7 @@ public class Cell extends AnchorPane
 
         getStyleClass().add("cell-hover-highlight");
     }
-
+    /*Path */
     public void hoverUnhighlight() 
     {
         getStyleClass().remove("cell-hover-highlight");
@@ -189,6 +190,8 @@ public class Cell extends AnchorPane
     }
     public void highwayColor()
     {
+        getStyleClass().remove("cell-highway");
+
     	getStyleClass().add("cell-highway");
     }
 

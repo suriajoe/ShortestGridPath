@@ -1,3 +1,5 @@
+import java.util.LinkedList;
+
 import javafx.scene.layout.Pane;
 
 public class Grid extends Pane 
@@ -10,6 +12,7 @@ public class Grid extends Pane
     double height;
 
     Cell[][] cells;
+    LinkedList<Cell> pathIsColored = new LinkedList<Cell>();
 
     public Grid(int columns, int rows, double width, double height) 
     {
@@ -61,23 +64,16 @@ public class Grid extends Pane
     	else 
     		return cells[row][column];
     }
-    /*
-    public Cell compareF(Cell c1, Cell c2)
-    {
-    	double fFunction1;
-    	double fFunction2;
 
-    	fFunction1 = c1.getG() + c1.getH();
-    	fFunction2 = c2.getG() + c2.getH();
-    	if(fFunction1 < fFunction2)
-    		return c1;
-    	else
-    		return c2;  	
-    }
-	*/
      //Unhighlight all cells
     public void hoverUnhighlight() 
     {
+        while(!pathIsColored.isEmpty())
+        {
+        	pathIsColored.getLast().cell = null;
+        	pathIsColored.removeLast().hoverUnhighlight();
+        }
+        pathIsColored = new LinkedList<Cell>();
         for( int row=0; row < rows; row++) 
         {
             for( int col=0; col < columns; col++) 
@@ -86,7 +82,7 @@ public class Grid extends Pane
         		{
         			cells[row][col].highwayColor();
         		}
-                cells[row][col].hoverUnhighlight();
+                //cells[row][col].hoverUnhighlight();
                 cells[row][col].setG(2147483647);
                 cells[row][col].setH(0);
                 cells[row][col].setFZero();

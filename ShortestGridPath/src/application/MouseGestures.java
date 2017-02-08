@@ -2,10 +2,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.PickResult;
 
 public class MouseGestures 
 {
@@ -37,9 +34,6 @@ public class MouseGestures
                     {
                     	((Cell)node).unhover();
                     }
-
-                    //for( String s: node.getStyleClass())
-                        //System.out.println( node + ": " + s);
                 }
 
             });
