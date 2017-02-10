@@ -18,9 +18,6 @@ public class MouseGestures
                 @Override
                 public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) 
                 {
-
-                    //System.out.println( visible + ": " + newValue);
-
                     if(newValue) 
                     {
                     	((Cell)node).hover();
@@ -41,17 +38,6 @@ public class MouseGestures
 
     }
     
-    
-    public void startPoint(Node node)
-    {
-    	((Cell)node).clean();
-    	((Cell)node).start();
-    }
-    public void goalPoint(Node node)
-    {
-    	((Cell)node).clean();
-    	((Cell)node).goal();
-    }
     public void roughColor(Node node)
     {
     	if((Cell)node == null)//cell reached out of bounds

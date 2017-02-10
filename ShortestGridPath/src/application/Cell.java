@@ -166,6 +166,8 @@ public class Cell extends AnchorPane
     }
     public void start() 
     {
+    	clean();
+
         getStyleClass().add("cell-start");
     }
     public void startClean() 
@@ -174,6 +176,7 @@ public class Cell extends AnchorPane
     }
     public void goal() 
     {
+    	clean();
         getStyleClass().add("cell-goal");
     }
     public void goalClean() 
@@ -182,6 +185,11 @@ public class Cell extends AnchorPane
     }
     public void brown()
     {
+    	getStyleClass().add("cell-rough");
+    }
+    public void brownReadFile()
+    {
+    	getStyleClass().remove("cell-highlight");
     	getStyleClass().add("cell-rough");
     }
     public boolean isOccupied()
