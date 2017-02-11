@@ -100,7 +100,7 @@ public class Controller extends Pane
 			@Override
 			public void handle(ActionEvent event)
 			{
-				path();
+				aStar();
 			}
 		});
 		
@@ -108,7 +108,7 @@ public class Controller extends Pane
 			@Override
 			public void handle(ActionEvent event)
 			{
-				uniformCost();
+				uniform();
 			}
 		});
 		
@@ -118,7 +118,7 @@ public class Controller extends Pane
 			{
 				String str = aWeight.getText();
 				double d = Double.parseDouble(str);
-				pathWeighted(d);
+				weighted(d);
 			}
 		});
 		
@@ -2242,7 +2242,24 @@ public class Controller extends Pane
         }
 	}
 	
-	
+	public void aStar()
+	{
+		AStar star = new AStar(grid,sourceX,sourceY,destX,destY);
+		star.pathSearch();
+		star.totalCost();
+	}
+	public void uniform()
+	{
+		UniformCostSearch uni = new UniformCostSearch(grid,sourceX,sourceY,destX,destY);
+		uni.pathSearch();
+		uni.totalCost();		
+	}
+	public void weighted(double d)
+	{
+		WeightedAStar weight = new WeightedAStar(grid,sourceX,sourceY,destX,destY);
+		weight.pathSearch(d);
+		weight.totalCost();		
+	}
 }
 
 
