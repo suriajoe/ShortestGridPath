@@ -4,6 +4,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,6 +49,7 @@ public class Controller extends Pane
 	private DoubleProperty fInt;	
 	private DoubleProperty hInt;
 	public static final Duration INDEFINITE = new Duration(Double.POSITIVE_INFINITY);
+	PerformanceTest pTest = new PerformanceTest();
 	
     int rows = 120;
     int columns = 160;
@@ -154,13 +156,13 @@ public class Controller extends Pane
 			public void changed(ObservableValue ov, Number value, Number new_value) 
 			{
 				if(new_value.intValue() == 0)
-					manhatten();
+					manhattenDis();
 				else if(new_value.intValue() == 1)
-					blockedCells();
+					blocked();
 				else if(new_value.intValue() == 2)
-					agentDistance();
+					agentDis();
 				else if(new_value.intValue() == 3)
-					opposite();
+					oppositeAStar();
 				
 			}
 		});
@@ -2227,7 +2229,7 @@ public class Controller extends Pane
         }   
         grid.hoverUnhighlight();
 	}
-	
+	//Delete
 	public void cleanHighway()
 	{
         for(int i=0;i<120;i++)
@@ -2244,22 +2246,89 @@ public class Controller extends Pane
 	
 	public void aStar()
 	{
+		pTest.memUsageBefore();
+		long t;
+		t = System.currentTimeMillis();
 		AStar star = new AStar(grid,sourceX,sourceY,destX,destY);
 		star.pathSearch();
+		t = System.currentTimeMillis()-t;
+		time.setValue(t);
 		star.totalCost();
+		pTest.memUsageAfter();
 	}
 	public void uniform()
 	{
+		pTest.memUsageBefore();
+		long t;
+		t = System.currentTimeMillis();
 		UniformCostSearch uni = new UniformCostSearch(grid,sourceX,sourceY,destX,destY);
 		uni.pathSearch();
-		uni.totalCost();		
+		t = System.currentTimeMillis()-t;
+		time.setValue(t);
+		uni.totalCost();	
+		pTest.memUsageAfter();
 	}
 	public void weighted(double d)
 	{
+		pTest.memUsageBefore();
+		long t;
+		t = System.currentTimeMillis();
 		WeightedAStar weight = new WeightedAStar(grid,sourceX,sourceY,destX,destY);
 		weight.pathSearch(d);
-		weight.totalCost();		
+		t = System.currentTimeMillis()-t;
+		time.setValue(t);
+		weight.totalCost();	
+		pTest.memUsageAfter();
 	}
+	public void manhattenDis()
+	{
+		pTest.memUsageBefore();
+		long t;
+		t = System.currentTimeMillis();
+		Manhatten ny = new Manhatten(grid,sourceX,sourceY,destX,destY);
+		ny.pathSearch();
+		t = System.currentTimeMillis()-t;
+		time.setValue(t);
+		ny.totalCost();
+		pTest.memUsageAfter();
+	}
+	public void agentDis()
+	{
+		pTest.memUsageBefore();
+		long t;
+		t = System.currentTimeMillis();
+		AgentDistance star = new AgentDistance(grid,sourceX,sourceY,destX,destY);
+		star.pathSearch();
+		t = System.currentTimeMillis()-t;
+		time.setValue(t);
+		star.totalCost();
+		pTest.memUsageAfter();
+	}
+	public void oppositeAStar()
+	{
+		pTest.memUsageBefore();
+		long t;
+		t = System.currentTimeMillis();
+		OppositeAStar star = new OppositeAStar(grid,sourceX,sourceY,destX,destY);
+		star.pathSearch();
+		t = System.currentTimeMillis()-t;
+		time.setValue(t);
+		star.totalCost();
+		pTest.memUsageAfter();
+	}
+	public void blocked()
+	{
+		pTest.memUsageBefore();
+		long t;
+		t = System.currentTimeMillis();
+		BlockedCells star = new BlockedCells(grid,sourceX,sourceY,destX,destY);
+		star.pathSearch();
+		t = System.currentTimeMillis()-t;
+		time.setValue(t);
+		star.totalCost();
+		pTest.memUsageAfter();
+	}
+		
 }
 
 
