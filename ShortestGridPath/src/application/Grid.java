@@ -4,6 +4,10 @@ import javafx.scene.layout.Pane;
 
 public class Grid extends Pane 
 {
+    int startX;
+    int startY;
+    int endX;
+    int endY;
 
     int rows;
     int columns;
@@ -23,7 +27,6 @@ public class Grid extends Pane
         this.height = height;
 
         cells = new Cell[rows][columns];
-
     }
 
     /**
@@ -34,6 +37,7 @@ public class Grid extends Pane
 
         cells[row][column] = cell;
 
+        
         double w = width / columns;
         double h = height / rows;
         double x = w * column;
@@ -43,7 +47,7 @@ public class Grid extends Pane
         cell.setLayoutY(y);
         cell.setPrefWidth(w);
         cell.setPrefHeight(h);
-
+		
         getChildren().add(cell);
 
     }
@@ -64,16 +68,45 @@ public class Grid extends Pane
     	else 
     		return cells[row][column];
     }
+    public void setStartX(int startX){
+    	this.startX = startX;
+    }
+    public int getStartX()
+    {
+    	return this.startX;
+    }
+    public void setStartY(int startY){
+    	this.startY = startY;
+    }
+    public int getStartY()
+    {
+    	return this.startY;
+    }
+    public void setEndX(int endX){
+    	this.endX = endX;
+    }
+    public int getEndX()
+    {
+    	return this.endX;
+    }
+    public void setEndY(int endY){
+    	this.endY = endY;
+    }
+    public int getEndY()
+    {
+    	return this.endY;
+    }
 
      //Unhighlight all cells
     public void hoverUnhighlight() 
     {
         while(!pathIsColored.isEmpty())
         {
-        	pathIsColored.getLast().cell = null;
-        	pathIsColored.removeLast().hoverUnhighlight();
+        	pathIsColored.getFirst().cell = null;
+        	pathIsColored.removeFirst().hoverUnhighlight();
         }
-        pathIsColored = new LinkedList<Cell>();
+        pathIsColored.clear();
+        
         for( int row=0; row < rows; row++) 
         {
             for( int col=0; col < columns; col++) 
@@ -82,10 +115,11 @@ public class Grid extends Pane
         		{
         			cells[row][col].highwayColor();
         		}
-                //cells[row][col].hoverUnhighlight();
                 cells[row][col].setG(2147483647);
                 cells[row][col].setH(0);
                 cells[row][col].setFZero();
+                if(cells[row][col].cell != null)
+                	cells[row][col].cell = null;
             }
         }
     }

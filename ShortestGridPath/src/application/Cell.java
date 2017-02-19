@@ -6,16 +6,15 @@ public class Cell extends AnchorPane
     int column; //X coordinate
     int row;    //Y coordinate
     double value;  //0=blocked,1=empty,2=hard/rough,0.25=empty(highway),0.5=rough(highway)
-    int type;      //0=blocked,1=empty,2=hard/rough,3=empty(highway),4=rough(highway),5=start/goal vertex
+    int type;      //0=blocked,1=empty,2=hard/rough,3=empty(highway),4=rough(highway),5=start,6=goal vertex
     double f; 
     double g;
     double h;
-    Node parent = null;
+    double key;
     Cell cell = null;
 
     public Cell(int column, int row) 
     {
-
         this.column = column;
         this.row = row;
         
@@ -30,7 +29,7 @@ public class Cell extends AnchorPane
      	this.row = row;
      	this.value = value;
      	this.type = type;
-     	this.g = 2147483647;
+     	this.g = 2147483647; //represents infinity
      	
      	getStyleClass().add("cell");
      	
@@ -108,18 +107,14 @@ public class Cell extends AnchorPane
     {
     	this.h = h;
     }
-    public void add(Node node)
-    {
-    	this.parent = node;
+    public void setKey(double key){
+    	this.key = key;
     }
-    public void removeNode(Node node)
+    public double getKey()
     {
-    	this.parent = null;
+    	return this.key;
     }
-    public Node peek()
-    {
-    	return this.parent;
-    }
+    
     public void highlight() 
     {
         // ensure the style is only once in the style list

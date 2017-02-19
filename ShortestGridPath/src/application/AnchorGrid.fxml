@@ -25,5 +25,6 @@
       <Label layoutX="378.0" layoutY="19.0" text="A* weight" />
       <Button fx:id="uniform" layoutX="608.0" layoutY="14.0" mnemonicParsing="false" text="Uniform" />
       <ChoiceBox fx:id="heuristic" layoutX="678.0" layoutY="14.0" prefHeight="26.0" prefWidth="132.0" />
+      <Button fx:id="test" layoutX="1123.0" layoutY="42.0" mnemonicParsing="false" text="Test Data" />
    </children>
 </AnchorPane>

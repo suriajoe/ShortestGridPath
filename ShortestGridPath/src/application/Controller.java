@@ -4,11 +4,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Timestamp;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.Random;
 
 import javafx.beans.value.ChangeListener;
@@ -36,11 +33,10 @@ public class Controller extends Pane
 {
 
 	@FXML private AnchorPane list;
-	@FXML Button saveGrid, loadGrid, createGrid, startPath, uniform; 
+	@FXML Button saveGrid, loadGrid, createGrid, startPath, uniform,test; 
 	@FXML Label xInfo,yInfo,gInfo,fInfo,hInfo,timeInfo;
 	@FXML TextField aWeight;
 	@FXML ChoiceBox<String> fiveMaps,tenPoints,heuristic;
-	//Name="tenpoints" IsEditable="True" IsReadOnly="True" Text="10 Points"
 	
 	private IntegerProperty xCoor;
 	private IntegerProperty yCoor;	
@@ -51,24 +47,21 @@ public class Controller extends Pane
 	public static final Duration INDEFINITE = new Duration(Double.POSITIVE_INFINITY);
 	PerformanceTest pTest = new PerformanceTest();
 	
-    int rows = 120;
-    int columns = 160;
-    int value = 1;
-    int type = 1;
+    static int rows = 120;
+    static int columns = 160;
+    static int value = 1;
+    static int type = 1;
     
     double width = 1200;
     double height = 670;
-    //Maybe make One Global Grid, or 6 Grid(1 for random, 5 for load from file)
-    //use list.getChildren.remove(grid[i]); grid=null  to clear it
     Grid grid;
     Grid fiveGrids[];
-    int sourceX;
-    int sourceY;
-    int destX;
-    int destY;
+    public static int sourceX;
+    public static int sourceY;
+    public static int destX;
+    public static int destY;
     int roughArrayX[] = new int[8];
     int roughArrayY[] = new int[8];
-    int timeCounter = 0;
     
 	public void start(Stage mainStage)
 	{
@@ -123,6 +116,13 @@ public class Controller extends Pane
 				weighted(d);
 			}
 		});
+		test.setOnAction(new EventHandler<ActionEvent>(){
+			@Override
+			public void handle(ActionEvent event)
+			{
+				testData();
+			}
+		});
 		
 	    fiveMaps.getItems().addAll("Map 1","Map 2","Map 3","Map 4","Map 5");
 		fiveMaps.getSelectionModel().selectedIndexProperty().addListener(new
@@ -131,7 +131,11 @@ public class Controller extends Pane
 				public void changed(ObservableValue ov, Number value, Number new_value) 
 				{
 					if(new_value.intValue() >= 0 && new_value.intValue() < 5)
+					{
+						if(!list.getChildren().isEmpty())
+							flush();
 						CreateGrid(10);
+					}
 				}
 		});
 	    
@@ -148,7 +152,7 @@ public class Controller extends Pane
 			}
 		});
 		
-	    heuristic.getItems().addAll("Manhatten","Blocked Cells","Agent Distance","Opposite");
+	    heuristic.getItems().addAll("Manhatten","Blocked Cells","Agent Distance","Opposite","Sequential Heuristic A*");
 
 		heuristic.getSelectionModel().selectedIndexProperty().addListener(new
 				 ChangeListener<Number>()
@@ -163,7 +167,8 @@ public class Controller extends Pane
 					agentDis();
 				else if(new_value.intValue() == 3)
 					oppositeAStar();
-				
+				else if(new_value.intValue() == 4)
+					sequentialHeuristic();
 			}
 		});
 		
@@ -404,16 +409,20 @@ public class Controller extends Pane
 	        	if(euclidean >= 100)
 	        	{
 	        		//X = col, Y = row
-	        		if(grid.getCell(startX, startY).getType() !=0 || grid.getCell(startX, startY).getType() !=5 
+	        		if(grid.getCell(startX, startY).getType() !=0 || grid.getCell(startX, startY).getType() !=5 || grid.getCell(startX, startY).getType() != 6
 	        				|| grid.getCell(startX, startY).getType() !=3 || grid.getCell(startX, startY).getType() !=4)
 	        		{
-	        			if(grid.getCell(goalX, goalY).getType() != 0 || grid.getCell(goalX, goalY).getType() !=5
+	        			if(grid.getCell(goalX, goalY).getType() != 0 || grid.getCell(goalX, goalY).getType() !=5 || grid.getCell(goalX, goalY).getType() != 6
 	        					|| grid.getCell(goalX, goalY).getType() !=3 || grid.getCell(goalX, goalY).getType() !=4)
 	        			{
 	    			    	grid.getCell(startX, startY).setType(5);
 	    			    	grid.getCell(startX, startY).setValue(1);
-	    			    	grid.getCell(goalX, goalY).setType(5);
+	    			    	grid.setStartX(startX);
+	    			    	grid.setStartY(startY);
+	    			    	grid.getCell(goalX, goalY).setType(6);
 	    			    	grid.getCell(goalX, goalY).setValue(1);
+	    			    	grid.setEndX(goalX);
+	    			    	grid.setEndY(goalY);
 	            			grid.getCell(startX, startY).start();
 	                        grid.getCell(goalX, goalY).goal();
 	                        sourceX = startX;
@@ -437,11 +446,9 @@ public class Controller extends Pane
 	//delete grid=null, use array of grid[] objects
 	public void flush()
 	{
-		list.getChildren().remove(grid);
-		int count = 0;
-		//while(count<5)
-			//list.getChildren().remove(fiveGrids[5]);
+		list.getChildren().clear();
 		grid = null;
+		//System.gc();
 	}
 	
 	public void writeFile()
@@ -492,7 +499,12 @@ public class Controller extends Pane
 				}
 				case(5):
 				{
-					rowStr = rowStr + 's' + " ";
+					rowStr = rowStr + '1' + " ";
+					break;
+				}
+				case(6):
+				{
+					rowStr = rowStr + '1' + " ";
 					break;
 				}
 				
@@ -649,7 +661,7 @@ public class Controller extends Pane
 	      grid.getCell(sx, sy).setValue(1);
 	      grid.getCell(sx, sy).setType(5);
 	      grid.getCell(dx, dy).setValue(1);	
-	      grid.getCell(dx, dy).setType(5);
+	      grid.getCell(dx, dy).setType(6);
 	      grid.getCell(sx, sy).start();
 	      grid.getCell(dx, dy).goal();
 	      
@@ -671,1491 +683,14 @@ public class Controller extends Pane
 	  }
 		
 	}
-	
-	public void path()
-	{      
-		Comparator<Cell> comparator = new CellCompare();
-        PriorityQueue<Cell> path = new PriorityQueue<Cell>(1000,comparator);
-        LinkedList<Cell> parentList = new LinkedList<Cell>();
-        
-        grid.hoverUnhighlight();
-        Cell goal = grid.getCell(destX, destY);
-        Cell s = grid.getCell(sourceX, sourceY);
-        Cell sPrime;
-        timeCounter = 0;
-        int currentX, currentY;//present cell
-        int eucX;//euclidean dis
-        int eucY;
-        int finalCost = 0; //g+h
-        int costVH = 1;
-        double costD = Math.sqrt(2);
-        int roughCostVH = 2;
-        double roughCostD = Math.sqrt(8);
-        double emptyRoughCostVH = 1.5;
-        double emptyRoughCostD = ((Math.sqrt(2)+Math.sqrt(8))/2);
-        double costVHWay = 0.25;
-        double roughVHWay = 0.5;
-        double emptyRoughVHWay = 0.375;
-        double euclideanDistance;				//heuristic
-        
-        grid.getCell(sourceX, sourceY).setG(0);
-		eucX=(s.getColumn()+1)-(goal.getColumn()+1);
-		eucY=(s.getRow()+1)-(goal.getRow()+1);
-		euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-        s.setH(euclideanDistance);
-        s.setF();
-        parentList.add(grid.getCell(sourceX, sourceY));
-        path.add(grid.getCell(sourceX, sourceY));
-        boolean closed[][] = new boolean[120][160];
-        boolean pathFound = false;
-        
-        while(!path.isEmpty())
-        {
-        	s=path.poll();
-
-        	if(s == goal)
-        	{
-            	s.hoverUnhighlight();
-        		System.out.println("path found");
-        		pathFound = true;
-        		break;
-        	}
-        	closed[s.getRow()][s.getColumn()] = true;
-            currentX = s.getColumn();
-            currentY = s.getRow();
-            
-            //pos 4
-            if(currentX-1>=0){
-            	sPrime = grid.getCell(currentX-1, currentY);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList);
-            	//pos 7
-                if(currentY-1>=0){                      
-                	sPrime = grid.getCell(currentX-1, currentY-1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
-                }
-                //pos 1
-                if(currentY+1<120){
-                	sPrime = grid.getCell(currentX-1, currentY+1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList);
-                }
-            } 
-            //pos 2
-            if(currentY-1>=0){
-            	sPrime = grid.getCell(currentX, currentY-1);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList);
-            }
-            //pos 8
-            if(currentY+1<120){
-            	sPrime = grid.getCell(currentX, currentY+1);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList); 
-            }
-            //pos 6
-            if(currentX+1<160){
-            	sPrime = grid.getCell(currentX+1, currentY);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList); 
-            	//pos 9
-                if(currentY-1>=0){
-                	sPrime = grid.getCell(currentX+1, currentY-1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
-                }
-                //pos 3
-                if(currentY+1<120){
-                	sPrime = grid.getCell(currentX+1, currentY+1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
-                }  
-            }
-        }
-        if(s != goal)
-        {
-        	System.out.println("No Path Found");
-        }
-        
-        double totalCost = 0;
-        double cellTotal = 0;
-        if(pathFound == true)
-        {
-        	grid.pathIsColored.add(s);
-        	while(goal.cell != null)
-        	{	
-        		grid.pathIsColored.add(goal.cell);
-        		goal.hoverHighlight();
-        		totalCost = totalCost + goal.getF();
-        		cellTotal = cellTotal + goal.getValue();
-        		goal=goal.cell;		
-        	}
-        }
-        System.out.println("AStar Euclidean Heuristic TotalCost: " + totalCost);
-        System.out.println("AStar Euclidean Heuristic cell cost total: " + cellTotal);
-        System.out.println("Number of cells traversed: " + timeCounter);
-        grid.getCell(sourceX, sourceY).hoverUnhighlight();
-        grid.getCell(destX, destY).hoverUnhighlight();
-	}
-
-	public void updateVertex(Cell s, Cell sPrime, double cost, double heuristicCost,boolean[][] closed
-							,PriorityQueue<Cell> fringe,LinkedList<Cell> parent)
-	{
-		//closed[120][160]
-		//cost = s.getF+cellCost
-		//heuristicCost= heuristicCost/4;
-		if(sPrime == null || sPrime.getType() == 0 || closed[sPrime.getRow()][sPrime.getColumn()]== true)
-			return;
-		double fCost = heuristicCost+cost;
-
 		
-		if(!fringe.contains(sPrime) || sPrime.getF()>fCost)
-		{
-			if(fringe.contains(sPrime))
-			{
-				fringe.remove(sPrime);
-			}
-			sPrime.setH(heuristicCost);
-			sPrime.setG(cost);
-			sPrime.setF();
-			fringe.add(sPrime);
-			timeCounter++;
-			sPrime.cell=s;			
-			//sPrime.hoverHighlight();
-			closed[sPrime.getRow()][sPrime.getColumn()] = true;
-		}
-		
-	}
-	
-	public void uniformCost()
-	{      
-		Comparator<Cell> comparator = new CellCompare();
-        PriorityQueue<Cell> path = new PriorityQueue<Cell>(1000,comparator);
-        LinkedList<Cell> parentList = new LinkedList<Cell>();
-        
-        grid.hoverUnhighlight();
-        Cell goal = grid.getCell(destX, destY);
-        Cell s = grid.getCell(sourceX, sourceY);
-        Cell sPrime;
-        timeCounter = 0;
-        int currentX, currentY;//present cell
-        int costVH = 1;
-        double costD = Math.sqrt(2);
-        int roughCostVH = 2;
-        double roughCostD = Math.sqrt(8);
-        double emptyRoughCostVH = 1.5;
-        double emptyRoughCostD = ((Math.sqrt(2)+Math.sqrt(8))/2);
-        double costVHWay = 0.25;
-        double roughVHWay = 0.5;
-        double emptyRoughVHWay = 0.375;
-        //heuristic
-        grid.getCell(sourceX, sourceY).setG(0);
-        s.setH(0);
-        s.setF();
-        parentList.add(grid.getCell(sourceX, sourceY));
-        path.add(grid.getCell(sourceX, sourceY));
-        boolean closed[][] = new boolean[120][160];
-        boolean pathFound = false;
-        
-        while(!path.isEmpty())
-        {
-        	s=path.poll();
-        	//parentList.poll();
-        	//s.hoverUnhighlight();
-        	if(s == goal)
-        	{
-            	s.hoverUnhighlight();
-        		System.out.println("path found");
-        		pathFound = true;
-        		break;
-        	}
-        	closed[s.getRow()][s.getColumn()] = true;
-            currentX = s.getColumn();
-            currentY = s.getRow();
-            
-            //pos 4
-            if(currentX-1>=0){
-            	sPrime = grid.getCell(currentX-1, currentY);
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertexUnifrom(s,sPrime,s.getF()+roughCostVH,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertexUnifrom(s,sPrime,s.getF()+emptyRoughCostVH,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertexUnifrom(s,sPrime,s.getF()+costVHWay,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertexUnifrom(s,sPrime,s.getF()+roughVHWay,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertexUnifrom(s,sPrime,s.getF()+emptyRoughVHWay,closed,path,parentList);
-            	else
-            		updateVertexUnifrom(s,sPrime,s.getF()+costVH,closed,path,parentList);
-            	//pos 7
-                if(currentY-1>=0){                      
-                	sPrime = grid.getCell(currentX-1, currentY-1);
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertexUnifrom(s,sPrime,s.getF()+roughCostD,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertexUnifrom(s,sPrime,s.getF()+emptyRoughCostD,closed,path,parentList); 
-                	else
-                		updateVertexUnifrom(s,sPrime,s.getF()+costD,closed,path,parentList); 
-                }
-                //pos 1
-                if(currentY+1<120){
-                	sPrime = grid.getCell(currentX-1, currentY+1);
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertexUnifrom(s,sPrime,s.getF()+roughCostD,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertexUnifrom(s,sPrime,s.getF()+emptyRoughCostD,closed,path,parentList);
-                	else
-                		updateVertexUnifrom(s,sPrime,s.getF()+costD,closed,path,parentList);
-                }
-            } 
-            //pos 2
-            if(currentY-1>=0){
-            	sPrime = grid.getCell(currentX, currentY-1);
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertexUnifrom(s,sPrime,s.getF()+roughCostVH,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertexUnifrom(s,sPrime,s.getF()+emptyRoughCostVH,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertexUnifrom(s,sPrime,s.getF()+costVHWay,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertexUnifrom(s,sPrime,s.getF()+roughVHWay,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertexUnifrom(s,sPrime,s.getF()+emptyRoughVHWay,closed,path,parentList); 
-            	else
-            		updateVertexUnifrom(s,sPrime,s.getF()+costVH,closed,path,parentList);
-            }
-            //pos 8
-            if(currentY+1<120){
-            	sPrime = grid.getCell(currentX, currentY+1);
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertexUnifrom(s,sPrime,s.getF()+roughCostVH,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertexUnifrom(s,sPrime,s.getF()+emptyRoughCostVH,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertexUnifrom(s,sPrime,s.getF()+costVHWay,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertexUnifrom(s,sPrime,s.getF()+roughVHWay,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertexUnifrom(s,sPrime,s.getF()+emptyRoughVHWay,closed,path,parentList); 
-            	else
-            		updateVertexUnifrom(s,sPrime,s.getF()+costVH,closed,path,parentList); 
-            }
-            //pos 6
-            if(currentX+1<160){
-            	sPrime = grid.getCell(currentX+1, currentY);
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertexUnifrom(s,sPrime,s.getF()+roughCostVH,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertexUnifrom(s,sPrime,s.getF()+emptyRoughCostVH,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertexUnifrom(s,sPrime,s.getF()+costVHWay,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertexUnifrom(s,sPrime,s.getF()+roughVHWay,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertexUnifrom(s,sPrime,s.getF()+emptyRoughVHWay,closed,path,parentList); 
-            	else
-            		updateVertexUnifrom(s,sPrime,s.getF()+costVH,closed,path,parentList); 
-            	//pos 9
-                if(currentY-1>=0){
-                	sPrime = grid.getCell(currentX+1, currentY-1);
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertexUnifrom(s,sPrime,s.getF()+roughCostD,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertexUnifrom(s,sPrime,s.getF()+emptyRoughCostD,closed,path,parentList);
-                	else
-                		updateVertexUnifrom(s,sPrime,s.getF()+costD,closed,path,parentList); 
-                }
-                //pos 3
-                if(currentY+1<120){
-                	sPrime = grid.getCell(currentX+1, currentY+1);
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertexUnifrom(s,sPrime,s.getF()+roughCostD,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertexUnifrom(s,sPrime,s.getF()+emptyRoughCostD,closed,path,parentList);
-                	else
-                		updateVertexUnifrom(s,sPrime,s.getF()+costD,closed,path,parentList); 
-                }  
-            }
-        }
-        if(s != goal)
-        {
-        	System.out.println("No Path Found");
-        }
-        
-        double totalCost = 0;
-        double cellTotal = 0;
-        if(pathFound == true)
-        {
-        	grid.pathIsColored.add(s);
-        	while(goal.cell != null)
-        	{	
-        		grid.pathIsColored.add(goal.cell);
-        		goal.hoverHighlight();
-        		totalCost = totalCost + goal.getF();
-        		cellTotal = cellTotal + goal.getValue();
-        		goal=goal.cell;		
-        	}
-        }
-        System.out.println("Uniform Search TotalCost: " + totalCost);
-        System.out.println("Uniform Search cell cost total: " + cellTotal);
-        System.out.println("Number of cells traversed: " + timeCounter);
-        
-        grid.getCell(sourceX, sourceY).hoverUnhighlight();
-        grid.getCell(destX, destY).hoverUnhighlight();
-	}
-
-	public void updateVertexUnifrom(Cell s, Cell sPrime, double cost,boolean[][] closed
-							,PriorityQueue<Cell> fringe,LinkedList<Cell> parent)
-	{
-		//closed[120][160]
-		//cost = s.getF+cellCost
-		
-		if(sPrime == null || sPrime.getType() == 0 || closed[sPrime.getRow()][sPrime.getColumn()]== true)
-			return;
-		double fCost = cost;
-
-		
-		if(!fringe.contains(sPrime) || sPrime.getF()>fCost)
-		{
-			if(fringe.contains(sPrime))
-			{
-				fringe.remove(sPrime);
-			}
-			//sPrime.setH(0);
-			sPrime.setG(cost);
-			sPrime.setF();
-			fringe.add(sPrime);
-			timeCounter++;
-			sPrime.cell=s;			
-			closed[sPrime.getRow()][sPrime.getColumn()] = true;
-		}
-		
-	}
-	public void pathWeighted(double weightValue)
-	{      
-		Comparator<Cell> comparator = new CellCompare();
-        PriorityQueue<Cell> path = new PriorityQueue<Cell>(200,comparator);
-        LinkedList<Cell> parentList = new LinkedList<Cell>();
-        
-        grid.hoverUnhighlight();
-        Cell goal = grid.getCell(destX, destY);
-        Cell s = grid.getCell(sourceX, sourceY);
-        Cell sPrime;
-        timeCounter = 0;
-        int currentX, currentY;//present cell
-        int eucX;//euclidean dis
-        int eucY;
-        int heuristicCost = 0;//HeuristicCost
-        int finalCost = 0; //g+h
-        int costVH = 1;
-        double costD = Math.sqrt(2);
-        int roughCostVH = 2;
-        double roughCostD = Math.sqrt(8);
-        double emptyRoughCostVH = 1.5;
-        double emptyRoughCostD = ((Math.sqrt(2)+Math.sqrt(8))/2);
-        double costVHWay = 0.25;
-        double roughVHWay = 0.5;
-        double emptyRoughVHWay = 0.375;
-        double euclideanDistance;			
-        //heuristic
-        grid.getCell(sourceX, sourceY).setG(0);
-		eucX=(s.getColumn()+1)-(goal.getColumn()+1);
-		eucY=(s.getRow()+1)-(goal.getRow()+1);
-		euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-		s.setH(euclideanDistance);
-        parentList.add(grid.getCell(sourceX, sourceY));
-        path.add(grid.getCell(sourceX, sourceY));
-        boolean closed[][] = new boolean[120][160];
-        boolean pathFound = false;
-        
-        while(!path.isEmpty())
-        {
-        	s=path.poll();
-        	//parentList.poll();
-        	//s.hoverUnhighlight();
-        	if(s == goal)
-        	{
-            	s.hoverUnhighlight();
-        		System.out.println("path found");
-        		pathFound = true;
-        		break;
-        	}
-        	closed[s.getRow()][s.getColumn()] = true;
-            currentX = s.getColumn();
-            currentY = s.getRow();
-            
-            //pos 4
-            if(currentX-1>=0){
-            	sPrime = grid.getCell(currentX-1, currentY);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance*weightValue,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance*weightValue,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,(euclideanDistance*weightValue)/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,(euclideanDistance*weightValue)/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,(euclideanDistance*weightValue)/4,closed,path,parentList); 
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance*weightValue,closed,path,parentList);
-            	//pos 7
-                if(currentY-1>=0){                      
-                	sPrime = grid.getCell(currentX-1, currentY-1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance*weightValue,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance*weightValue,closed,path,parentList);
-                	else if(s.getType() == 3 && sPrime.getType() == 3) 
-                		updateVertex(s,sPrime,s.getF()+costVHWay,(euclideanDistance*weightValue)/4,closed,path,parentList);
-                	else if(s.getType() == 4 && sPrime.getType() == 4)
-                		updateVertex(s,sPrime,s.getF()+roughVHWay,(euclideanDistance*weightValue)/4,closed,path,parentList);          		
-                	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,(euclideanDistance*weightValue)/4,closed,path,parentList); 
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance*weightValue,closed,path,parentList); 
-                }
-                //pos 1
-                if(currentY+1<120){
-                	sPrime = grid.getCell(currentX-1, currentY+1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance*weightValue,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance*weightValue,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance*weightValue,closed,path,parentList);
-                }
-            } 
-            //pos 2
-            if(currentY-1>=0){
-            	sPrime = grid.getCell(currentX, currentY-1);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance*weightValue,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance*weightValue,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,(euclideanDistance*weightValue)/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,(euclideanDistance*weightValue)/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,(euclideanDistance*weightValue)/4,closed,path,parentList); 
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance*weightValue,closed,path,parentList);
-            }
-            //pos 8
-            if(currentY+1<120){
-            	sPrime = grid.getCell(currentX, currentY+1);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance*weightValue,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance*weightValue,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,(euclideanDistance*weightValue)/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,(euclideanDistance*weightValue)/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,(euclideanDistance*weightValue)/4,closed,path,parentList); 
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance*weightValue,closed,path,parentList); 
-            }
-            //pos 6
-            if(currentX+1<160){
-            	sPrime = grid.getCell(currentX+1, currentY);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance*weightValue,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance*weightValue,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,(euclideanDistance*weightValue)/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,(euclideanDistance*weightValue)/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,(euclideanDistance*weightValue)/4,closed,path,parentList); 
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance*weightValue,closed,path,parentList); 
-            	//pos 9
-                if(currentY-1>=0){
-                	sPrime = grid.getCell(currentX+1, currentY-1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance*weightValue,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance*weightValue,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance*weightValue,closed,path,parentList); 
-                }
-                //pos 3
-                if(currentY+1<120){
-                	sPrime = grid.getCell(currentX+1, currentY+1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance*weightValue,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance*weightValue,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance*weightValue,closed,path,parentList); 
-                }  
-            }
-        }
-        if(s != goal)
-        {
-        	System.out.println("No Path Found");
-        }
-        
-        double totalCost = 0;
-        double cellTotal = 0;
-        if(pathFound == true)
-        {
-        	grid.pathIsColored.add(s);
-        	while(goal.cell != null)
-        	{	
-        		grid.pathIsColored.add(goal.cell);
-        		goal.hoverHighlight();
-        		totalCost = totalCost + goal.getF();
-        		cellTotal = cellTotal + goal.getValue();
-        		goal=goal.cell;		
-        	}
-        }
-        System.out.println("Weighted Euclidean TotalCost: " + totalCost);
-        System.out.println("Weighted cell cost total: " + cellTotal);
-        System.out.println("Number of cells traversed: " + timeCounter);
-        grid.getCell(sourceX, sourceY).hoverUnhighlight();
-        grid.getCell(destX, destY).hoverUnhighlight();
-	}
-	
-	public void manhatten()
-	{      
-		Comparator<Cell> comparator = new CellCompare();
-        PriorityQueue<Cell> path = new PriorityQueue<Cell>(200,comparator);
-        LinkedList<Cell> parentList = new LinkedList<Cell>();
-        
-        grid.hoverUnhighlight();
-        Cell goal = grid.getCell(destX, destY);
-        Cell s = grid.getCell(sourceX, sourceY);
-        Cell sPrime;
-        timeCounter = 0;
-        int currentX, currentY;//present cell
-        int eucX;//euclidean dis
-        int eucY;
-        int heuristicCost = 0;//HeuristicCost
-        int finalCost = 0; //g+h
-        int costVH = 1;
-        double costD = Math.sqrt(2);
-        int roughCostVH = 2;
-        double roughCostD = Math.sqrt(8);
-        double emptyRoughCostVH = 1.5;
-        double emptyRoughCostD = ((Math.sqrt(2)+Math.sqrt(8))/2);
-        double costVHWay = 0.25;
-        double roughVHWay = 0.5;
-        double emptyRoughVHWay = 0.375;
-        double euclideanDistance;		//Actually Manhatten distance	
-        //heuristic
-		eucX=(s.getColumn()+1)-(goal.getColumn()+1);
-		eucY=(s.getRow()+1)-(goal.getRow()+1);
-		euclideanDistance = Math.abs(eucX)+Math.abs(eucY);
-		s.setH(euclideanDistance);
-        grid.getCell(sourceX, sourceY).setG(0);
-        parentList.add(grid.getCell(sourceX, sourceY));
-        path.add(grid.getCell(sourceX, sourceY));
-        boolean closed[][] = new boolean[120][160];
-        boolean pathFound = false;
-        
-        while(!path.isEmpty())
-        {
-        	s=path.poll();
-        	//parentList.poll();
-        	//s.hoverUnhighlight();
-        	if(s == goal)
-        	{
-            	s.hoverUnhighlight();
-        		System.out.println("path found");
-        		pathFound = true;
-        		break;
-        	}
-        	closed[s.getRow()][s.getColumn()] = true;
-            currentX = s.getColumn();
-            currentY = s.getRow();
-            
-            //pos 4
-            if(currentX-1>=0){
-            	sPrime = grid.getCell(currentX-1, currentY);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.abs(eucX)+Math.abs(eucY);
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList);
-            	//pos 7
-                if(currentY-1>=0){                      
-                	sPrime = grid.getCell(currentX-1, currentY-1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.abs(eucX)+Math.abs(eucY);
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
-                }
-                //pos 1
-                if(currentY+1<120){
-                	sPrime = grid.getCell(currentX-1, currentY+1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.abs(eucX)+Math.abs(eucY);
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList);
-                }
-            } 
-            //pos 2
-            if(currentY-1>=0){
-            	sPrime = grid.getCell(currentX, currentY-1);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.abs(eucX)+Math.abs(eucY);
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList);
-            }
-            //pos 8
-            if(currentY+1<120){
-            	sPrime = grid.getCell(currentX, currentY+1);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.abs(eucX)+Math.abs(eucY);
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList); 
-            }
-            //pos 6
-            if(currentX+1<160){
-            	sPrime = grid.getCell(currentX+1, currentY);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.abs(eucX)+Math.abs(eucY);
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList); 
-            	//pos 9
-                if(currentY-1>=0){
-                	sPrime = grid.getCell(currentX+1, currentY-1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.abs(eucX)+Math.abs(eucY);
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
-                }
-                //pos 3
-                if(currentY+1<120){
-                	sPrime = grid.getCell(currentX+1, currentY+1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.abs(eucX)+Math.abs(eucY);
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
-                }  
-            }
-        }
-        if(s != goal)
-        {
-        	System.out.println("No Path Found");
-        }
-        
-        double totalCost = 0;
-        double cellTotal = 0;
-        if(pathFound == true)
-        {
-        	grid.pathIsColored.add(s);
-        	while(goal.cell != null)
-        	{	
-        		grid.pathIsColored.add(goal.cell);
-        		goal.hoverHighlight();
-        		totalCost = totalCost + goal.getF();
-        		cellTotal = cellTotal + goal.getValue();
-        		goal=goal.cell;		
-        	}
-        }
-        System.out.println("AStar Manhattan Heuristic TotalCost: " + totalCost);
-        System.out.println("AStar Manhattan Heuristic cell cost total: " + cellTotal);
-        System.out.println("Number of cells traversed: " + timeCounter);
-        grid.getCell(sourceX, sourceY).hoverUnhighlight();
-        grid.getCell(destX, destY).hoverUnhighlight();
-	}
-
-	
-	public void agentDistance()
-	{      
-		Comparator<Cell> comparator = new CellCompare();
-        PriorityQueue<Cell> path = new PriorityQueue<Cell>(200,comparator);
-        LinkedList<Cell> parentList = new LinkedList<Cell>();
-        
-        grid.hoverUnhighlight();
-        Cell goal = grid.getCell(destX, destY);
-        Cell s = grid.getCell(sourceX, sourceY);
-        Cell sPrime;
-        timeCounter = 0;
-        int currentX, currentY;//present cell
-        int futureX;
-        int futureY;
-        int costVH = 1;
-        double costD = Math.sqrt(2);
-        int roughCostVH = 2;
-        double roughCostD = Math.sqrt(8);
-        double emptyRoughCostVH = 1.5;
-        double emptyRoughCostD = ((Math.sqrt(2)+Math.sqrt(8))/2);
-        double costVHWay = 0.25;
-        double roughVHWay = 0.5;
-        double emptyRoughVHWay = 0.375;
-        double euclideanDistance = 0;			
-        //heuristic
-        grid.getCell(sourceX, sourceY).setG(0);
-        parentList.add(grid.getCell(sourceX, sourceY));
-        path.add(grid.getCell(sourceX, sourceY));
-        boolean closed[][] = new boolean[120][160];
-        boolean pathFound = false;
-        
-            currentX = s.getColumn();
-            currentY = s.getRow();
-            futureX = goal.getColumn();
-            futureY = goal.getRow();
-            
-            while(currentX != futureX && currentY != futureY)
-            {            		
-            	euclideanDistance = Math.sqrt(2);
-            	if(currentX > futureX)
-            		currentX--;
-            	else
-            		currentX++;
-            	
-            	if(currentY > futureY)
-            		currentY--;
-            	else
-            		currentY++;
-
-            }
-            s.setH(euclideanDistance);
-            while(!path.isEmpty())
-            {
-            	s=path.poll();
-            	//parentList.poll();
-            	//s.hoverUnhighlight();
-            	if(s == goal)
-            	{
-                	s.hoverUnhighlight();
-            		System.out.println("path found");
-            		pathFound = true;
-            		break;
-            	}
-            	closed[s.getRow()][s.getColumn()] = true;
-                currentX = s.getColumn();
-                currentY = s.getRow();
-                
-                //pos 4
-                if(currentX-1>=0){
-                	sPrime = grid.getCell(currentX-1, currentY);
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 3 && sPrime.getType() == 3) 
-                		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-                	else if(s.getType() == 4 && sPrime.getType() == 4)
-                		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-                	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList);          		
-                	else
-                		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList);
-                	//pos 7
-                    if(currentY-1>=0){                      
-                    	sPrime = grid.getCell(currentX-1, currentY-1);
-                    	if(s.getType() == 2 && sPrime.getType() == 2)
-                    		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                    	else if(s.getType() == 2 || sPrime.getType() == 2)
-                    		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                    	else
-                    		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
-                    }
-                    //pos 1
-                    if(currentY+1<120){
-                    	sPrime = grid.getCell(currentX-1, currentY+1);
-                    	if(s.getType() == 2 && sPrime.getType() == 2)
-                    		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                    	else if(s.getType() == 2 || sPrime.getType() == 2)
-                    		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                    	else
-                    		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList);
-                    }
-                } 
-                //pos 2
-                if(currentY-1>=0){
-                	sPrime = grid.getCell(currentX, currentY-1);
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 3 && sPrime.getType() == 3) 
-                		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-                	else if(s.getType() == 4 && sPrime.getType() == 4)
-                		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-                	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
-                	else
-                		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList);
-                }
-                //pos 8
-                if(currentY+1<120){
-                	sPrime = grid.getCell(currentX, currentY+1);
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 3 && sPrime.getType() == 3) 
-                		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-                	else if(s.getType() == 4 && sPrime.getType() == 4)
-                		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-                	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
-                	else
-                		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList); 
-                }
-                //pos 6
-                if(currentX+1<160){
-                	sPrime = grid.getCell(currentX+1, currentY);
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 3 && sPrime.getType() == 3) 
-                		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-                	else if(s.getType() == 4 && sPrime.getType() == 4)
-                		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-                	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
-                	else
-                		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList); 
-                	//pos 9
-                    if(currentY-1>=0){
-                    	sPrime = grid.getCell(currentX+1, currentY-1);
-                    	if(s.getType() == 2 && sPrime.getType() == 2)
-                    		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                    	else if(s.getType() == 2 || sPrime.getType() == 2)
-                    		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                    	else
-                    		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
-                    }
-                    //pos 3
-                    if(currentY+1<120){
-                    	sPrime = grid.getCell(currentX+1, currentY+1);
-                    	if(s.getType() == 2 && sPrime.getType() == 2)
-                    		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                    	else if(s.getType() == 2 || sPrime.getType() == 2)
-                    		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                    	else
-                    		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
-                    }  
-                }
-            }
-            if(s != goal)
-            {
-            	System.out.println("No Path Found");
-            }
-            double totalCost = 0;
-            double cellTotal = 0;
-            if(pathFound == true)
-            {
-            	grid.pathIsColored.add(s);
-            	while(goal.cell != null)
-            	{	
-            		grid.pathIsColored.add(goal.cell);
-            		goal.hoverHighlight();
-            		totalCost = totalCost + goal.getF();
-            		cellTotal = cellTotal + goal.getValue();
-            		goal=goal.cell;		
-            	}
-            }
-            
-        System.out.println("Agent Distance Heuristic TotalCost: " + euclideanDistance);
-        System.out.println("Agent Distance Heuristic cell cost total: " + cellTotal);
-        System.out.println("Number of cells traversed: " + timeCounter);
-        grid.getCell(sourceX, sourceY).hoverUnhighlight();
-        grid.getCell(destX, destY).hoverUnhighlight();
-	}
-	public void opposite()
-	{      
-		Comparator<Cell> comparator = new CellCompare();
-        PriorityQueue<Cell> path = new PriorityQueue<Cell>(200,comparator);
-        LinkedList<Cell> parentList = new LinkedList<Cell>();
-        
-        grid.hoverUnhighlight();
-        Cell s = grid.getCell(destX, destY);
-        Cell goal = grid.getCell(sourceX, sourceY);
-        Cell sPrime;
-        timeCounter = 0;
-        int currentX, currentY;//present cell
-        int eucX;//euclidean dis
-        int eucY;
-        int costVH = 1;
-        double costD = Math.sqrt(2);
-        int roughCostVH = 2;
-        double roughCostD = Math.sqrt(8);
-        double emptyRoughCostVH = 1.5;
-        double emptyRoughCostD = ((Math.sqrt(2)+Math.sqrt(8))/2);
-        double costVHWay = 0.25;
-        double roughVHWay = 0.5;
-        double emptyRoughVHWay = 0.375;
-        double euclideanDistance;			
-        //heuristic
-        s.setG(0);
-		eucX=(s.getColumn()+1)-(goal.getColumn()+1);
-		eucY=(s.getRow()+1)-(goal.getRow()+1);
-		euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));        
-		s.setH(euclideanDistance);
-        parentList.add(s);
-        path.add(s);
-        boolean closed[][] = new boolean[120][160];
-        boolean pathFound = false;
-        //time start
-        while(!path.isEmpty())
-        {
-        	s=path.poll();
-        	//parentList.poll();
-        	//s.hoverUnhighlight();
-        	if(s == goal)
-        	{
-            	s.hoverUnhighlight();
-        		System.out.println("path found");
-        		pathFound = true;
-        		break;
-        	}
-        	closed[s.getRow()][s.getColumn()] = true;
-            currentX = s.getColumn();
-            currentY = s.getRow();
-            
-            //pos 4
-            if(currentX-1>=0){
-            	sPrime = grid.getCell(currentX-1, currentY);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList);
-            	//pos 7
-                if(currentY-1>=0){                      
-                	sPrime = grid.getCell(currentX-1, currentY-1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
-                }
-                //pos 1
-                if(currentY+1<120){
-                	sPrime = grid.getCell(currentX-1, currentY+1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList);
-                }
-            } 
-            //pos 2
-            if(currentY-1>=0){
-            	sPrime = grid.getCell(currentX, currentY-1);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList);
-            }
-            //pos 8
-            if(currentY+1<120){
-            	sPrime = grid.getCell(currentX, currentY+1);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList); 
-            }
-            //pos 6
-            if(currentX+1<160){
-            	sPrime = grid.getCell(currentX+1, currentY);
-    			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-    			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-    			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList); 
-            	//pos 9
-                if(currentY-1>=0){
-                	sPrime = grid.getCell(currentX+1, currentY-1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
-                }
-                //pos 3
-                if(currentY+1<120){
-                	sPrime = grid.getCell(currentX+1, currentY+1);
-        			eucX=(sPrime.getColumn()+1)-(goal.getColumn()+1);
-        			eucY=(sPrime.getRow()+1)-(goal.getRow()+1);
-        			euclideanDistance = Math.sqrt(Math.pow(eucX,2)+Math.pow(eucY, 2));
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
-                }  
-            }
-        }
-        if(s != goal)
-        {
-        	System.out.println("No Path Found");
-        }
-        //time end
-        double totalCost = 0;
-        double cellTotal = 0;
-        if(pathFound == true)
-        {
-        	grid.pathIsColored.add(s);
-        	while(goal.cell != null)
-        	{	
-        		grid.pathIsColored.add(goal.cell);
-        		goal.hoverHighlight();
-        		totalCost = totalCost + goal.getF();
-        		cellTotal = cellTotal + goal.getValue();
-        		goal=goal.cell;		
-        	}
-        }
-        System.out.println("AStar Reverse Euclidean Heuristic TotalCost: " + totalCost);
-        System.out.println("AStar Reverse Euclidean Heuristic cell cost total: " + cellTotal);
-        System.out.println("Number of cells traversed: " + timeCounter);
-        grid.getCell(sourceX, sourceY).hoverUnhighlight();
-        grid.getCell(destX, destY).hoverUnhighlight();
-	}
-	
-	public void blockedCells()
-	{      
-		Comparator<Cell> comparator = new CellCompare();
-        PriorityQueue<Cell> path = new PriorityQueue<Cell>(200,comparator);
-        LinkedList<Cell> parentList = new LinkedList<Cell>();
-        
-        grid.hoverUnhighlight();
-        Cell goal = grid.getCell(destX, destY);
-        Cell s = grid.getCell(sourceX, sourceY);
-        Cell sPrime;
-        timeCounter = 0;
-        int currentX, currentY;//present cell
-        int futureX, futureY;
-        int costVH = 1;
-        double costD = Math.sqrt(2);
-        int roughCostVH = 2;
-        double roughCostD = Math.sqrt(8);
-        double emptyRoughCostVH = 1.5;
-        double emptyRoughCostD = ((Math.sqrt(2)+Math.sqrt(8))/2);
-        double costVHWay = 0.25;
-        double roughVHWay = 0.5;
-        double emptyRoughVHWay = 0.375;
-        double euclideanDistance;			
-        //heuristic
-        grid.getCell(sourceX, sourceY).setG(0);        
-        parentList.add(grid.getCell(sourceX, sourceY));
-        path.add(grid.getCell(sourceX, sourceY));
-        boolean closed[][] = new boolean[120][160];
-        boolean pathFound = false;
-        
-        if(s != goal)
-        {
-        	System.out.println("No Path Found");
-        }
-        currentX = s.getColumn();
-        currentY = s.getRow();
-        futureX = goal.column;
-        futureY = goal.getRow();
-         euclideanDistance = 0;
-        for(int i=Math.min(futureX, currentX);i<=Math.max(futureX,currentX);i++)
-        {
-        	for(int j=Math.min(futureY, currentY);j<=Math.max(futureY, currentY);j++)
-        	{
-        		if(grid.getCell(i, j).getType()==0)
-        			euclideanDistance++;
-        	}
-        }
-        s.setH(euclideanDistance);
-        while(!path.isEmpty())
-        {
-        	s=path.poll();
-        	if(s == goal)
-        	{
-            	s.hoverUnhighlight();
-        		System.out.println("path found");
-        		pathFound = true;
-        		break;
-        	}
-        	closed[s.getRow()][s.getColumn()] = true;
-            currentX = s.getColumn();
-            currentY = s.getRow();
-            
-            //pos 4
-            if(currentX-1>=0){
-            	sPrime = grid.getCell(currentX-1, currentY);
-
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance,closed,path,parentList);          		
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList);
-            	//pos 7
-                if(currentY-1>=0){                      
-                	sPrime = grid.getCell(currentX-1, currentY-1);
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
-                }
-                //pos 1
-                if(currentY+1<120){
-                	sPrime = grid.getCell(currentX-1, currentY+1);
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList);
-                }
-            } 
-            //pos 2
-            if(currentY-1>=0){
-            	sPrime = grid.getCell(currentX, currentY-1);
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList);
-            }
-            //pos 8
-            if(currentY+1<120){
-            	sPrime = grid.getCell(currentX, currentY+1);
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList); 
-            }
-            //pos 6
-            if(currentX+1<160){
-            	sPrime = grid.getCell(currentX+1, currentY);
-            	if(s.getType() == 2 && sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+roughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 2 || sPrime.getType() == 2)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughCostVH,euclideanDistance,closed,path,parentList);
-            	else if(s.getType() == 3 && sPrime.getType() == 3) 
-            		updateVertex(s,sPrime,s.getF()+costVHWay,euclideanDistance/4,closed,path,parentList);
-            	else if(s.getType() == 4 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+roughVHWay,euclideanDistance/4,closed,path,parentList);          		
-            	else if(s.getType() == 4 && sPrime.getType() == 3 || s.getType() == 3 && sPrime.getType() == 4)
-            		updateVertex(s,sPrime,s.getF()+emptyRoughVHWay,euclideanDistance/4,closed,path,parentList); 
-            	else
-            		updateVertex(s,sPrime,s.getF()+costVH,euclideanDistance,closed,path,parentList); 
-            	//pos 9
-                if(currentY-1>=0){
-                	sPrime = grid.getCell(currentX+1, currentY-1);
-                	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
-                }
-                //pos 3
-                if(currentY+1<120){
-                	sPrime = grid.getCell(currentX+1, currentY+1);
-                 	if(s.getType() == 2 && sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+roughCostD,euclideanDistance,closed,path,parentList);
-                	else if(s.getType() == 2 || sPrime.getType() == 2)
-                		updateVertex(s,sPrime,s.getF()+emptyRoughCostD,euclideanDistance,closed,path,parentList);
-                	else
-                		updateVertex(s,sPrime,s.getF()+costD,euclideanDistance,closed,path,parentList); 
-                }  
-            }
-        }
-        
-        double totalCost = 0;
-        double cellTotal = 0;
-        if(pathFound == true)
-        {
-        	while(goal.cell != null)
-        	{	
-            	grid.pathIsColored.add(s);
-        		goal.hoverHighlight();
-        		totalCost = totalCost + goal.getF();
-        		cellTotal = cellTotal + goal.getValue();
-        		goal=goal.cell;		
-        	}
-        }
-        System.out.println("AStar Euclidean Heuristic TotalCost: " + totalCost);
-        System.out.println("AStar Euclidean Heuristic cell cost total: " + cellTotal);
-        System.out.println("Number of cells traversed: " + timeCounter);
-        grid.getCell(sourceX, sourceY).hoverUnhighlight();
-        grid.getCell(destX, destY).hoverUnhighlight();
-	}
-
-
-	/*Create a thread that sets a timer when path starts, stop timer when goal reached
-	long tStart = System.currentTimeMillis();
-	public void time() throws InterruptedException
-	{
-	   Timeline timeline = new Timeline(new KeyFrame(Duration.millis(1), ae->doSomething()));
-	
-	   timeline.setCycleCount(Animation.INDEFINITE);
-	   timeline.play();
-	}
-	
-	int count;
-	public void doSomething()
-	{
-		time.setValue(System.currentTimeMillis()-tStart);
-	}
-	*/
-	
 	public void tenPoints()
 	{
         //grid.hoverUnhighlight();
-
-        grid.getCell(sourceX, sourceY).setType(1);
-        grid.getCell(sourceX, sourceY).setValue(1);
-        grid.getCell(sourceX, sourceY).startClean();
-        grid.getCell(destX, destY).setType(1);
-        grid.getCell(destX, destY).setValue(1);
-        grid.getCell(destX, destY).goalClean();
+		int startX = grid.getStartX();
+		int startY = grid.getStartY();
+		int finishX = grid.getEndX();
+		int finishY = grid.getEndY();
         
         Random rand = new Random();
         //Select random start and goal points   
@@ -2206,27 +741,38 @@ public class Controller extends Pane
         	if(euclidean >= 100)
         	{
         		//X = col, Y = row
-        		if(grid.getCell(sX, sY).getType() !=0 || grid.getCell(sX, sY).getType() !=5 
-        				|| grid.getCell(sX, sY).getType() !=3 || grid.getCell(sX, sY).getType() !=4)
+        		if(grid.getCell(sX, sY).getType() !=0 || grid.getCell(sX, sY).getType() !=5 || grid.getCell(sX, sY).getType() != 6
+        				|| grid.getCell(sX, sY).getType() !=3 || grid.getCell(sX, sY).getType() !=4 )
         		{
-        			if(grid.getCell(goalX, goalY).getType() != 0 || grid.getCell(goalX, goalY).getType() !=5
+        			if(grid.getCell(goalX, goalY).getType() != 0 || grid.getCell(goalX, goalY).getType() !=5 || grid.getCell(sX, sY).getType() != 6
         					|| grid.getCell(goalX, goalY).getType() !=3 || grid.getCell(goalX, goalY).getType() !=4)
         			{
     			    	grid.getCell(sX, sY).setType(5);
     			    	grid.getCell(sX, sY).setValue(1);
-    			    	grid.getCell(goalX, goalY).setType(5);
+    			    	grid.getCell(goalX, goalY).setType(6);
     			    	grid.getCell(goalX, goalY).setValue(1);
             			grid.getCell(sX, sY).start();
+                        grid.setStartX(sX);
+                        grid.setStartY(sY);
                         grid.getCell(goalX, goalY).goal();
-                        sourceX = sX;
-                        sourceY = sY;
-                        destX = goalX;
-                        destY = goalY;
+                        grid.setEndX(goalX);
+                        grid.setEndY(goalY);
+                        sourceX = sX;						//update 
+                        sourceY = sY;						//update
+                        destX = goalX;						//update 
+                        destY = goalY;						//update 
                         distance100 = false;
         			}      			
         		}
         	}
         }   
+        //old start/end points convert to empty cells
+        grid.getCell(startX, startY).setType(1);
+        grid.getCell(startX, startY).setValue(1);
+        grid.getCell(startX, startY).startClean();
+        grid.getCell(finishX, finishY).setType(1);
+        grid.getCell(finishX, finishY).setValue(1);
+        grid.getCell(finishX, finishY).goalClean();
         grid.hoverUnhighlight();
 	}
 	//Delete
@@ -2246,89 +792,525 @@ public class Controller extends Pane
 	
 	public void aStar()
 	{
-		pTest.memUsageBefore();
+		long memTest;
+		memTest = pTest.memUsage();
 		long t;
+		AStar star = new AStar(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+		star.clean();
 		t = System.currentTimeMillis();
-		AStar star = new AStar(grid,sourceX,sourceY,destX,destY);
 		star.pathSearch();
 		t = System.currentTimeMillis()-t;
 		time.setValue(t);
 		star.totalCost();
-		pTest.memUsageAfter();
+		memTest = memTest - pTest.memUsage();
+		System.out.println("Time:" + t +"ms");
+		System.out.println("Search memory used in bytes: " + memTest);
 	}
 	public void uniform()
 	{
-		pTest.memUsageBefore();
+		long memTest;
+		memTest = pTest.memUsage();
 		long t;
+		UniformCostSearch uni = new UniformCostSearch(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+		uni.clean();
 		t = System.currentTimeMillis();
-		UniformCostSearch uni = new UniformCostSearch(grid,sourceX,sourceY,destX,destY);
 		uni.pathSearch();
 		t = System.currentTimeMillis()-t;
 		time.setValue(t);
 		uni.totalCost();	
-		pTest.memUsageAfter();
+		memTest = memTest - pTest.memUsage();
+		System.out.println("Time:" + t +"ms");
+		System.out.println("Search memory used in bytes: " + memTest);
 	}
 	public void weighted(double d)
 	{
-		pTest.memUsageBefore();
+		long memTest;
+		memTest = pTest.memUsage();
 		long t;
+		WeightedAStar weight = new WeightedAStar(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+		weight.clean();
 		t = System.currentTimeMillis();
-		WeightedAStar weight = new WeightedAStar(grid,sourceX,sourceY,destX,destY);
 		weight.pathSearch(d);
 		t = System.currentTimeMillis()-t;
 		time.setValue(t);
 		weight.totalCost();	
-		pTest.memUsageAfter();
+		memTest = memTest - pTest.memUsage();
+		System.out.println("Time:" + t +"ms");
+		System.out.println("Search memory used in bytes: " + memTest);
 	}
 	public void manhattenDis()
 	{
-		pTest.memUsageBefore();
+		long memTest;
+		memTest = pTest.memUsage();
 		long t;
+		Manhatten ny = new Manhatten(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+		ny.clean();
 		t = System.currentTimeMillis();
-		Manhatten ny = new Manhatten(grid,sourceX,sourceY,destX,destY);
 		ny.pathSearch();
 		t = System.currentTimeMillis()-t;
 		time.setValue(t);
 		ny.totalCost();
-		pTest.memUsageAfter();
+		memTest = memTest - pTest.memUsage();
+		System.out.println("Time:" + t +"ms");
+		System.out.println("Search memory used in bytes: " + memTest);
 	}
 	public void agentDis()
 	{
-		pTest.memUsageBefore();
+		long memTest;
+		memTest = pTest.memUsage();
 		long t;
+		AgentDistance star = new AgentDistance(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+		star.clean();
 		t = System.currentTimeMillis();
-		AgentDistance star = new AgentDistance(grid,sourceX,sourceY,destX,destY);
 		star.pathSearch();
 		t = System.currentTimeMillis()-t;
 		time.setValue(t);
 		star.totalCost();
-		pTest.memUsageAfter();
+		memTest = memTest - pTest.memUsage();
+		System.out.println("Time:" + t +"ms");
+		System.out.println("Search memory used in bytes: " + memTest);
 	}
 	public void oppositeAStar()
 	{
-		pTest.memUsageBefore();
+		long memTest;
+		memTest = pTest.memUsage();
 		long t;
+		OppositeAStar star = new OppositeAStar(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+		star.clean();
 		t = System.currentTimeMillis();
-		OppositeAStar star = new OppositeAStar(grid,sourceX,sourceY,destX,destY);
 		star.pathSearch();
 		t = System.currentTimeMillis()-t;
 		time.setValue(t);
 		star.totalCost();
-		pTest.memUsageAfter();
+		memTest = memTest - pTest.memUsage();
+		System.out.println("Time:" + t +"ms");
+		System.out.println("Search memory used in bytes: " + memTest);
 	}
 	public void blocked()
 	{
-		pTest.memUsageBefore();
+		long memTest;
+		memTest = pTest.memUsage();
 		long t;
+		BlockedCells star = new BlockedCells(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+		star.clean();
 		t = System.currentTimeMillis();
-		BlockedCells star = new BlockedCells(grid,sourceX,sourceY,destX,destY);
 		star.pathSearch();
 		t = System.currentTimeMillis()-t;
 		time.setValue(t);
 		star.totalCost();
-		pTest.memUsageAfter();
+		memTest = memTest - pTest.memUsage();
+		System.out.println("Time:" + t +"ms");
+		System.out.println("Search memory used in bytes: " + memTest);
 	}
+	public void sequentialHeuristic()
+	{
+		long memTest;
+		memTest = pTest.memUsage();
+		long t;
+		SequentialHeuristic sh = new SequentialHeuristic(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+		sh.clean();
+		t = System.currentTimeMillis();
+		sh.mainSequence();
+		t = System.currentTimeMillis()-t;
+		time.setValue(t);
+		sh.printPath();
+		memTest = memTest - pTest.memUsage();
+		System.out.println("Time:" + t +"ms");
+		System.out.println("Search memory used in bytes: " + memTest);
+	}
+	
+	//Create 5 Maps, then 10 Points and test for each search algorithm. Then save results in a file
+	public void testData()
+	{
+		int map = 0;
+		int point = 0;
+		int counter = 0;
+		long memTest;
+		long t;
+		long[] timeDataAstar = new long[50];
+		long[] timeDataUniform = new long[50];
+		long[] timeDataWeighted1point5 = new long[50];
+		long[] timeDataWeighted1point25 = new long[50];
+		long[] timeDataManhatten = new long[50];
+		long[] timeDataAgent = new long[50];
+		long[] timeDataOpposite = new long[50];
+		long[] timeDataBlock = new long[50];
+		long[] timeDataSequential = new long[50];
 		
+		long[] memAstar = new long[50];
+		long[] memUniform = new long[50];
+		long[] memWeighted1point5 = new long[50];
+		long[] memWeighted1point25 = new long[50];
+		long[] memManhatten = new long[50];
+		long[] memAgent = new long[50];
+		long[] memOpposite = new long[50];
+		long[] memBlock = new long[50];
+		long[] memSequential = new long[50];
+
+		int[] pathAstar = new int[50];
+		int[] pathUniform = new int[50];
+		int[] pathWeighted1point5 = new int[50];
+		int[] pathWeighted1point25 = new int[50];
+		int[] pathManhatten = new int[50];
+		int[] pathAgent = new int[50];
+		int[] pathOpposite = new int[50];
+		int[] pathBlock = new int[50];
+		int[] pathSequential = new int[50];
+
+		int[] blockAstar = new int[50];
+		int[] blockUniform = new int[50];
+		int[] blockWeighted1point5 = new int[50];
+		int[] blockWeighted1point25 = new int[50];
+		int[] blockManhatten = new int[50];
+		int[] blockAgent = new int[50];
+		int[] blockOpposite = new int[50];
+		int[] blockBlock = new int[50];
+		int[] blockSequential = new int[50];
+		
+		while(map < 5)
+		{
+			flush();
+			CreateGrid(10);
+			point=0;
+			while(point<10)
+			{					
+				//write gui map to new file, then run algo.
+				String source = ""+sourceX + "," + sourceY;
+				String dest = ""+destX + "," + destY;
+				LinkedList<String> line = new LinkedList<String>();
+				line.add(source); 
+				line.add(dest);
+				for(int i=0;i<8;i++)
+				{
+					String roughCoor = ""+roughArrayX[i]+","+roughArrayY[i];
+					line.add(roughCoor);
+				}
+				
+				for(int i=0;i<120;i++)
+				{
+					String rowStr="";
+					
+					for(int j=0;j<160;j++)
+					{
+						switch(grid.getCell(j, i).getType())
+						{
+						case(0):
+						{
+							rowStr = rowStr + 0 + " ";
+							break;
+						}
+						case(1):
+						{
+							rowStr = rowStr + 1 + " ";
+							break;
+						}
+						case(2):
+						{
+							rowStr = rowStr + 2 + " ";
+							break;
+						}
+						case(3):
+						{
+							rowStr = rowStr + 'a' + " ";
+							break;
+						}
+						case(4):
+						{
+							rowStr = rowStr + 'b' + " ";
+							break;
+						}
+						case(5):
+						{
+							rowStr = rowStr + 's' + " ";
+							break;
+						}
+						case(6):
+						{
+							rowStr = rowStr + 'g' + " ";
+							break;
+						}
+						
+						}			
+					}
+					line.add(rowStr);
+				}
+				counter++;
+				Path file = Paths.get("../../Test/grid"+counter+".txt");
+				try {
+					Files.write(file, line, Charset.forName("UTF-8"));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+				
+				AStar star = new AStar(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+				UniformCostSearch uni = new UniformCostSearch(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+				WeightedAStar weightOne = new WeightedAStar(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+				WeightedAStar weightTwo = new WeightedAStar(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+				Manhatten ny = new Manhatten(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+				AgentDistance agent = new AgentDistance(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+				OppositeAStar oppo = new OppositeAStar(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+				BlockedCells block = new BlockedCells(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+				SequentialHeuristic sh = new SequentialHeuristic(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+				
+				//AStar
+				memTest = pTest.memUsage();
+				star.clean();
+				t = System.currentTimeMillis();
+				star.pathSearch();
+				t = System.currentTimeMillis()-t;
+				memTest = memTest - pTest.memUsage();
+				timeDataAstar[counter-1] = t;
+				memAstar[counter-1] = memTest;
+				pathAstar[counter-1] = star.getPathLength();
+				blockAstar[counter-1] = star.getBlockCounter();
+				//Uniform
+				memTest = pTest.memUsage();
+				uni.clean();
+				t = System.currentTimeMillis();
+				uni.pathSearch();
+				t = System.currentTimeMillis()-t;
+				memTest = memTest - pTest.memUsage();
+				timeDataUniform[counter-1] = t;
+				memUniform[counter-1] = memTest;
+				pathUniform[counter-1] = uni.getPathLength();
+				blockUniform[counter-1] = uni.getBlockCounter();
+				//Weighted value = 1.5
+				memTest = pTest.memUsage();
+				weightOne.clean();
+				t = System.currentTimeMillis();
+				weightOne.pathSearch(1.5);
+				t = System.currentTimeMillis()-t;
+				memTest = memTest - pTest.memUsage();
+				timeDataWeighted1point5[counter-1] = t;
+				memWeighted1point5[counter-1] = memTest;
+				pathWeighted1point5[counter-1] = weightOne.getPathLength();
+				blockWeighted1point5[counter-1] = weightOne.getBlockCounter();
+				//Weighted value = 1.25
+				memTest = pTest.memUsage();
+				weightTwo.clean();
+				t = System.currentTimeMillis();
+				weightTwo.pathSearch(1.25);
+				t = System.currentTimeMillis()-t;
+				memTest = memTest - pTest.memUsage();
+				timeDataWeighted1point25[counter-1] = t;
+				memWeighted1point25[counter-1] = memTest;
+				pathWeighted1point25[counter-1] = weightTwo.getPathLength();
+				blockWeighted1point25[counter-1] = weightTwo.getBlockCounter();
+				//Manhatten
+				memTest = pTest.memUsage();
+				ny.clean();
+				t = System.currentTimeMillis();
+				ny.pathSearch();
+				t = System.currentTimeMillis()-t;
+				memTest = memTest - pTest.memUsage();
+				timeDataManhatten[counter-1] = t;
+				memManhatten[counter-1] = memTest;
+				pathManhatten[counter-1] = ny.getPathLength();
+				blockManhatten[counter-1] = ny.getBlockCounter();
+				//Agent Distance
+				memTest = pTest.memUsage();
+				agent.clean();
+				t = System.currentTimeMillis();
+				agent.pathSearch();
+				t = System.currentTimeMillis()-t;
+				memTest = memTest - pTest.memUsage();
+				timeDataAgent[counter-1] = t;
+				memAgent[counter-1] = memTest;
+				pathAgent[counter-1] = agent.getPathLength();
+				blockAgent[counter-1] = agent.getBlockCounter();
+				//Opposite Astar
+				memTest = pTest.memUsage();
+				oppo.clean();
+				t = System.currentTimeMillis();
+				oppo.pathSearch();
+				t = System.currentTimeMillis()-t;
+				memTest = memTest - pTest.memUsage();
+				timeDataOpposite[counter-1] = t;
+				memOpposite[counter-1] = memTest;
+				pathOpposite[counter-1] = oppo.getPathLength();
+				blockOpposite[counter-1] = oppo.getBlockCounter();
+				//Blocked Cells
+				memTest = pTest.memUsage();
+				block.clean();
+				t = System.currentTimeMillis();
+				block.pathSearch();
+				t = System.currentTimeMillis()-t;
+				memTest = memTest - pTest.memUsage();
+				timeDataBlock[counter-1] = t;
+				memBlock[counter-1] = memTest;
+				pathBlock[counter-1] = block.getPathLength();
+				blockBlock[counter-1] = block.getBlockCounter();
+				//Sequential Heuristic
+				memTest = pTest.memUsage();
+				sh.clean();
+				t = System.currentTimeMillis();
+				sh.mainSequence();
+				t = System.currentTimeMillis()-t;
+				memTest = memTest - pTest.memUsage();
+				timeDataSequential[counter-1] = t;
+				memSequential[counter-1] = memTest;
+				pathSequential[counter-1] = sh.getPathLength();
+				blockSequential[counter-1] = sh.getBlockCounter();
+				
+				point++;
+				tenPoints();
+			}
+			map++;
+		}
+		
+		LinkedList<String> line = new LinkedList<String>();
+		LinkedList<String> avgLine = new LinkedList<String>();
+		line.add("Raw Data for 5 Heuristics, Sequential Heuristic A* and Integrated Heuristic A*");
+		avgLine.add("Averages for 5 Heuristics, Sequential Heurisitic A* and Integrated Heuristic A*");
+		for(int i=1;i<=5;i++)
+		{
+			double[] time = new double[9];
+			double[] mem = new double[9];
+			double[] pathL = new double[9];
+			double[] blockExpanded = new double[9];
+			
+			line.add("");
+			line.add("Map:"+i);
+			avgLine.add("");
+			avgLine.add("Map:"+i);		
+			for(int j=1;j<=10;j++)
+			{
+				line.add("");
+				line.add("Start/Goal Points:"+j);
+				line.add("AStar Euclidean:		time:"+timeDataAstar[(i*j)-1]+"ms"
+							+" memory usage:"+memAstar[(i*j)-1]+"bytes"
+							+" path length:" +pathAstar[(i*j)-1]
+							+"	nodes expanded:"+blockAstar[(i*j)-1]);
+				line.add("Uniform Cost Search:		time:"+timeDataUniform[(i*j)-1]+"ms"
+						+" memory usage:"+memUniform[(i*j)-1]+"bytes"
+						+" path length:" +pathUniform[(i*j)-1]
+						+"	nodes expanded:"+blockUniform[(i*j)-1]);
+				line.add("Weighted Astar Value(1.5):	time:"+timeDataWeighted1point5[(i*j)-1]+"ms"
+						+" memory usage:"+memWeighted1point5[(i*j)-1]+"bytes"
+						+" path length:" +pathWeighted1point5[(i*j)-1]
+						+"	nodes expanded:"+blockWeighted1point5[(i*j)-1]);
+				line.add("Weighted Astar Value(1.25):	time:"+timeDataWeighted1point25[(i*j)-1]+"ms"
+						+" memory usage:"+memWeighted1point25[(i*j)-1]+"bytes"
+						+" path length:" +pathWeighted1point25[(i*j)-1]
+						+"	nodes expanded:"+blockWeighted1point25[(i*j)-1]);
+				line.add("Astar Manhattan:		time:"+timeDataManhatten[(i*j)-1]+"ms"
+						+" memory usage:"+memManhatten[(i*j)-1]+"bytes"
+						+" path length:" +pathManhatten[(i*j)-1]
+						+"	nodes expanded:"+blockManhatten[(i*j)-1]);
+				line.add("Agent Distance:		time:"+timeDataAgent[(i*j)-1]+"ms"
+						+" memory usage:"+memAgent[(i*j)-1]+"bytes"
+						+" path length:" +pathAgent[(i*j)-1]
+						+"	nodes expanded:"+blockAgent[(i*j)-1]);
+				line.add("Backwards AStar:		time:"+timeDataOpposite[(i*j)-1]+"ms"
+						+" memory usage:"+memOpposite[(i*j)-1]+"bytes"
+						+" path length:" +pathOpposite[(i*j)-1]
+						+"	nodes expanded:"+blockOpposite[(i*j)-1]);
+				line.add("Number of Blocked Cells:	time:"+timeDataBlock[(i*j)-1]+"ms"
+						+" memory usage:"+memBlock[(i*j)-1]+"bytes"
+						+" path length:" +pathBlock[(i*j)-1]
+						+"	nodes expanded:"+blockBlock[(i*j)-1]);
+				line.add("Sequential Heuristic AStar:	time:"+timeDataSequential[(i*j)-1]+"ms"
+						+" memory usage:"+memSequential[(i*j)-1]+"bytes"
+						+" path length:" +pathSequential[(i*j)-1]
+						+"	nodes expanded:"+blockSequential[(i*j)-1]);
+				
+				time[0]=time[0]+timeDataAstar[(i*j)-1];
+				time[1]=time[1]+timeDataUniform[(i*j)-1];
+				time[2]=time[2]+timeDataWeighted1point5[(i*j)-1];
+				time[3]=time[3]+timeDataWeighted1point25[(i*j)-1];
+				time[4]=time[4]+timeDataManhatten[(i*j)-1];
+				time[5]=time[5]+timeDataAgent[(i*j)-1];
+				time[6]=time[6]+timeDataOpposite[(i*j)-1];
+				time[7]=time[7]+timeDataBlock[(i*j)-1];
+				time[8]=time[8]+timeDataSequential[(i*j)-1];
+				
+				mem[0]=mem[0]+memAstar[(i*j)-1];
+				mem[1]=mem[1]+memUniform[(i*j)-1];
+				mem[2]=mem[2]+memWeighted1point5[(i*j)-1];
+				mem[3]=mem[3]+memWeighted1point25[(i*j)-1];
+				mem[4]=mem[4]+memManhatten[(i*j)-1];
+				mem[5]=mem[5]+memAgent[(i*j)-1];
+				mem[6]=mem[6]+memOpposite[(i*j)-1];
+				mem[7]=mem[7]+memBlock[(i*j)-1];
+				mem[8]=mem[8]+memSequential[(i*j)-1];
+				
+				pathL[0]=pathL[0]+pathAstar[(i*j)-1];
+				pathL[1]=pathL[0]+pathUniform[(i*j)-1];
+				pathL[2]=pathL[0]+pathWeighted1point5[(i*j)-1];
+				pathL[3]=pathL[0]+pathWeighted1point25[(i*j)-1];
+				pathL[4]=pathL[0]+pathManhatten[(i*j)-1];
+				pathL[5]=pathL[0]+pathAgent[(i*j)-1];
+				pathL[6]=pathL[0]+pathOpposite[(i*j)-1];
+				pathL[7]=pathL[0]+pathBlock[(i*j)-1];
+				pathL[8]=pathL[0]+pathSequential[(i*j)-1];
+
+				blockExpanded[0]=blockExpanded[0]+blockAstar[(i*j)-1];
+				blockExpanded[1]=blockExpanded[1]+blockUniform[(i*j)-1];
+				blockExpanded[2]=blockExpanded[2]+blockWeighted1point5[(i*j)-1];
+				blockExpanded[3]=blockExpanded[3]+blockWeighted1point25[(i*j)-1];
+				blockExpanded[4]=blockExpanded[4]+blockManhatten[(i*j)-1];
+				blockExpanded[5]=blockExpanded[5]+blockAgent[(i*j)-1];
+				blockExpanded[6]=blockExpanded[6]+blockOpposite[(i*j)-1];
+				blockExpanded[7]=blockExpanded[7]+blockBlock[(i*j)-1];
+				blockExpanded[8]=blockExpanded[8]+blockSequential[(i*j)-1];
+			}
+			avgLine.add("AStar Euclidean: time Average:"+time[0]/10+"ms");
+			avgLine.add("AStar Euclidean: memory usage Average:"+mem[0]/10+"bytes");
+			avgLine.add("AStar Euclidean: path length Average:"+pathL[0]/10);
+			avgLine.add("AStar Euclidean: nodes expanded Average:"+blockExpanded[0]/10);
+			avgLine.add("");
+			avgLine.add("Uniform Cost Search: time Average:"+time[1]/10+"ms");
+			avgLine.add("Uniform Cost Search: memory usage Average:"+mem[1]/10+"bytes");
+			avgLine.add("Uniform Cost Search: path length Average:"+pathL[1]/10);
+			avgLine.add("Uniform Cost Search: nodes expanded Average:"+blockExpanded[1]/10);
+			avgLine.add("");
+			avgLine.add("Weighted Astar Value(1.5): time Average:"+time[2]/10+"ms");
+			avgLine.add("Weighted Astar Value(1.5): memory usage Average:"+mem[2]/10+"bytes");
+			avgLine.add("Weighted Astar Value(1.5): path length Average:"+pathL[2]/10);
+			avgLine.add("Weighted Astar Value(1.5): nodes expanded Average:"+blockExpanded[2]/10);
+			avgLine.add("");
+			avgLine.add("Weighted Astar Value(1.25): time Average:"+time[3]/10+"ms");
+			avgLine.add("Weighted Astar Value(1.25): memory usage Average:"+mem[3]/10+"bytes");
+			avgLine.add("Weighted Astar Value(1.25): path length Average:"+pathL[3]/10);
+			avgLine.add("Weighted Astar Value(1.25): nodes expanded Average:"+blockExpanded[3]/10);
+			avgLine.add("");
+			avgLine.add("AStar Manhattan: time Average:"+time[4]/10+"ms");
+			avgLine.add("AStar Manhattan: memory usage Average:"+mem[4]/10+"bytes");
+			avgLine.add("AStar Manhattan: path length Average:"+pathL[4]/10);
+			avgLine.add("AStar Manhattan: nodes expanded Average:"+blockExpanded[4]/10);
+			avgLine.add("");
+			avgLine.add("Agent Distance: time Average:"+time[5]/10+"ms");
+			avgLine.add("Agent Distance: memory usage Average:"+mem[5]/10+"bytes");
+			avgLine.add("Agent Distance: path length Average:"+pathL[5]/10);
+			avgLine.add("Agent Distance: nodes expanded Average:"+blockExpanded[5]/10);
+			avgLine.add("");
+			avgLine.add("Backwards AStar: time Average:"+time[6]/10+"ms");
+			avgLine.add("Backwards AStar: memory usage Average:"+mem[6]/10+"bytes");
+			avgLine.add("Backwards AStar: path length Average:"+pathL[6]/10);
+			avgLine.add("Backwards AStar: nodes expanded Average:"+blockExpanded[6]/10);
+			avgLine.add("");
+			avgLine.add("Number of Block Cells: time Average:"+time[7]/10+"ms");
+			avgLine.add("Number of Block Cells: memory usage Average:"+mem[7]/10+"bytes");
+			avgLine.add("Number of Block Cells: path length Average:"+pathL[7]/10);
+			avgLine.add("Number of Block Cells: nodes expanded Average:"+blockExpanded[7]/10);
+			avgLine.add("");
+			avgLine.add("Sequential Heuristic AStar: time Average:"+time[8]/10+"ms");
+			avgLine.add("Sequential Heuristic AStar: memory usage Average:"+mem[8]/10+"bytes");
+			avgLine.add("Sequential Heuristic AStar: path length Average:"+pathL[8]/10);
+			avgLine.add("Sequential Heuristic AStar: nodes expanded Average:"+blockExpanded[8]/10);
+		}
+		
+		Path file = Paths.get("../../Test/RawData.txt");
+		Path doc = Paths.get("../../Test/AvgData.txt");
+		try {
+			Files.write(file, line, Charset.forName("UTF-8"));
+			Files.write(doc, avgLine, Charset.forName("UTF-8"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
 }
 
 
