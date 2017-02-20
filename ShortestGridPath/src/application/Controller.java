@@ -152,7 +152,7 @@ public class Controller extends Pane
 			}
 		});
 		
-	    heuristic.getItems().addAll("Manhatten","Blocked Cells","Agent Distance","Opposite","Sequential Heuristic A*");
+	    heuristic.getItems().addAll("Manhatten","Blocked Cells","Agent Distance","Opposite","Sequential Heuristic A*","Integrated Heuristic A*");
 
 		heuristic.getSelectionModel().selectedIndexProperty().addListener(new
 				 ChangeListener<Number>()
@@ -169,6 +169,8 @@ public class Controller extends Pane
 					oppositeAStar();
 				else if(new_value.intValue() == 4)
 					sequentialHeuristic();
+				else if(new_value.intValue() == 5)
+					integratedHeuristic();
 			}
 		});
 		
@@ -914,6 +916,22 @@ public class Controller extends Pane
 		t = System.currentTimeMillis()-t;
 		time.setValue(t);
 		sh.printPath();
+		memTest = memTest - pTest.memUsage();
+		System.out.println("Time:" + t +"ms");
+		System.out.println("Search memory used in bytes: " + memTest);
+	}
+	public void integratedHeuristic()
+	{
+		long memTest;
+		memTest = pTest.memUsage();
+		long t;
+		IntegratedAStar ih = new IntegratedAStar(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+		ih.clean();
+		t = System.currentTimeMillis();
+		ih.mainIntegrated();
+		t = System.currentTimeMillis()-t;
+		time.setValue(t);
+		ih.printPath();
 		memTest = memTest - pTest.memUsage();
 		System.out.println("Time:" + t +"ms");
 		System.out.println("Search memory used in bytes: " + memTest);

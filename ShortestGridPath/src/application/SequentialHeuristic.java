@@ -3,7 +3,7 @@ import java.util.LinkedList;
 import java.util.PriorityQueue;
 
 public class SequentialHeuristic {
-	static int numOfHeuristics = 3;
+	static int numOfHeuristics = 4;
 	Comparator<Cell> keyComparator = new keyCompare();	
 	LinkedList<LinkedList<Cell>> list = new LinkedList<LinkedList<Cell>>();
 	LinkedList<PriorityQueue<Cell>> open = new LinkedList<PriorityQueue<Cell>>();
@@ -11,7 +11,7 @@ public class SequentialHeuristic {
     boolean closed[][][] = new boolean[numOfHeuristics][120][160];
 	int w1 = 1;//>1
 	int w2 = 1;//>1
-	boolean pathFound[] = new boolean[10];
+	boolean pathFound[] = new boolean[numOfHeuristics];
     int blockCounter;
     double total;
     double cell;
@@ -46,6 +46,7 @@ public class SequentialHeuristic {
 		{
 			s = openKey.peek();
 			k = key(s,1,hValue);
+			s.setKey(k);
 			openKey.poll();
 			openKey.add(s);
 		}
@@ -69,6 +70,8 @@ public class SequentialHeuristic {
 		Manhatten ny = new Manhatten(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
 		//2
 		AgentDistance agent = new AgentDistance(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+		//3
+		BlockedCells block = new BlockedCells(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
 		double hValue = 0;
 		
 		//search the cells neighbor
@@ -101,6 +104,10 @@ public class SequentialHeuristic {
 						{
 							hValue = agent.seqHeuristic(s,goal);
 						}
+						else if(i==3)
+						{
+							hValue = block.seqHeuristic(s, goal);
+						}
 						sPrime.key = key(sPrime,i,hValue);
 						open.get(i).add(sPrime);
 						blockCounter++;
@@ -129,6 +136,10 @@ public class SequentialHeuristic {
 							else if(i==2)
 							{
 								hValue = agent.seqHeuristic(s,goal);
+							}
+							else if(i==3)
+							{
+								hValue = block.seqHeuristic(s, goal);
 							}
 							sPrime.key = key(sPrime,i,hValue);
 							open.get(i).add(sPrime);
@@ -159,6 +170,10 @@ public class SequentialHeuristic {
 							else if(i==2)
 							{
 								hValue = agent.seqHeuristic(s,goal);
+							}
+							else if(i==3)
+							{
+								hValue = block.seqHeuristic(s, goal);
 							}
 							sPrime.key = key(sPrime,i,hValue);
 							open.get(i).add(sPrime);
@@ -191,6 +206,10 @@ public class SequentialHeuristic {
 						{
 							hValue = agent.seqHeuristic(s,goal);
 						}
+						else if(i==3)
+						{
+							hValue = block.seqHeuristic(s, goal);
+						}
 						sPrime.key = key(sPrime,i,hValue);
 						open.get(i).add(sPrime);
 						blockCounter++;
@@ -220,6 +239,10 @@ public class SequentialHeuristic {
 						else if(i==2)
 						{
 							hValue = agent.seqHeuristic(s,goal);
+						}
+						else if(i==3)
+						{
+							hValue = block.seqHeuristic(s, goal);
 						}
 						sPrime.key = key(sPrime,i,hValue);
 						open.get(i).add(sPrime);
@@ -251,6 +274,10 @@ public class SequentialHeuristic {
 						{
 							hValue = agent.seqHeuristic(s,goal);
 						}
+						else if(i==3)
+						{
+							hValue = block.seqHeuristic(s, goal);
+						}
 						sPrime.key = key(sPrime,i,hValue);
 						open.get(i).add(sPrime);
 						blockCounter++;
@@ -279,6 +306,10 @@ public class SequentialHeuristic {
 							else if(i==2)
 							{
 								hValue = agent.seqHeuristic(s,goal);
+							}
+							else if(i==3)
+							{
+								hValue = block.seqHeuristic(s, goal);
 							}
 							sPrime.key = key(sPrime,i,hValue);
 							open.get(i).add(sPrime);
@@ -310,6 +341,10 @@ public class SequentialHeuristic {
 							{
 								hValue = agent.seqHeuristic(s,goal);
 							}
+							else if(i==3)
+							{
+								hValue = block.seqHeuristic(s, goal);
+							}
 							sPrime.key = key(sPrime,i,hValue);
 							open.get(i).add(sPrime);
 							blockCounter++;
@@ -328,7 +363,7 @@ public class SequentialHeuristic {
 		//weightedValue = weight;
 		int n = numOfHeuristics; //num of heuristics used
 		Cell s = null;
-		Cell goal[] = new Cell[3];
+		Cell goal[] = new Cell[numOfHeuristics];
 		int heuristicNum = 0;
 		double hValue = 0;
 		boolean forloopFinished = false;
@@ -338,6 +373,8 @@ public class SequentialHeuristic {
 		Manhatten ny = new Manhatten(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
 		//2
 		AgentDistance agent = new AgentDistance(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
+		//3
+		BlockedCells block = new BlockedCells(grid,grid.getStartX(),grid.getStartY(),grid.getEndX(),grid.getEndY());
 		
 		for(int i=0;i<n;i++)
 		{
@@ -358,6 +395,10 @@ public class SequentialHeuristic {
 			else if(i==2)
 			{
 				hValue = agent.seqHeuristic(s,goal[i]);
+			}
+			else if(i==3)
+			{
+				hValue = block.seqHeuristic(s, goal[i]);
 			}
 				
 			s.setKey(key(s,i,hValue));//open minKey starts at zero
@@ -380,6 +421,10 @@ public class SequentialHeuristic {
 				else if(i==2)
 				{
 					hValue = agent.seqHeuristic(s,goal[i]);
+				}
+				else if(i==3)
+				{
+					hValue = block.seqHeuristic(s, goal[i]);
 				}
 				
 				if(minKey(open.get(i),-1) <= w2*minKey(open.get(0),-1))
@@ -462,8 +507,8 @@ public class SequentialHeuristic {
     
     public void printPath()
     {
-    	System.out.println("AStar Euclidean Heurisitc path length:" + getPathLength());
-        System.out.println("AStar Euclidean Heuristic cell cost total: " + getCellCost());
+    	System.out.println("Sequential Heuristic path length:" + getPathLength());
+        System.out.println("Sequential Heuristic cell cost total: " + getCellCost());
         System.out.println("Number of cells traversed: " + getBlockCounter());
     }
     public void setTotalCost(double totalCost)

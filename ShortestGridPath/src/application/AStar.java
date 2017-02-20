@@ -21,7 +21,7 @@ public class AStar extends PathSearch{
     
     public void printPath(double totalCost,double cellTotal,int blockCounter,int pathLength)
     {
-    	System.out.println("AStar Euclidean Heurisitc path length:" + pathLength);
+    	System.out.println("AStar Euclidean Heuristic path length:" + pathLength);
         System.out.println("AStar Euclidean Heuristic cell cost total: " + cellTotal);
         System.out.println("Number of cells traversed: " + blockCounter);
     }

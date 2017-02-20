@@ -117,6 +117,8 @@ public class Grid extends Pane
         		}
                 cells[row][col].setG(2147483647);
                 cells[row][col].setH(0);
+                cells[row][col].setKey(0);
+                cells[row][col].setV(0);
                 cells[row][col].setFZero();
                 if(cells[row][col].cell != null)
                 	cells[row][col].cell = null;

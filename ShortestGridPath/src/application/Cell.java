@@ -11,6 +11,7 @@ public class Cell extends AnchorPane
     double g;
     double h;
     double key;
+    double v;
     Cell cell = null;
 
     public Cell(int column, int row) 
@@ -30,6 +31,7 @@ public class Cell extends AnchorPane
      	this.value = value;
      	this.type = type;
      	this.g = 2147483647; //represents infinity
+     	this.v = 2147483647; //represents infinity
      	
      	getStyleClass().add("cell");
      	
@@ -113,6 +115,13 @@ public class Cell extends AnchorPane
     public double getKey()
     {
     	return this.key;
+    }
+    public void setV(double v){
+    	this.v = v;
+    }
+    public double getV()
+    {
+    	return this.v;
     }
     
     public void highlight() 

@@ -1,6 +1,5 @@
 public class AgentDistance extends PathSearch{
     boolean runOnce = true;
-
     public AgentDistance(Grid grid,int sourceX, int sourceY,int destX,int destY)
     {
     	super(grid, sourceX, sourceY, destX, destY);
@@ -21,7 +20,7 @@ public class AgentDistance extends PathSearch{
     
     public void printPath(double totalCost,double cellTotal,int blockCounter,int pathLength)
     {
-    	System.out.println("Agent Distance Heurisitc path length:" + pathLength);
+    	System.out.println("Agent Distance Heuristic path length:" + pathLength);
         System.out.println("Agent Distance Heuristic cell cost total: " + cellTotal);
         System.out.println("Number of cells traversed: " + blockCounter);
     }
@@ -53,16 +52,14 @@ public class AgentDistance extends PathSearch{
     }
     
     public double seqHeuristic(Cell s,Cell goal)
-    {
-    	//s = grid.getCell(grid.getStartX(), grid.getStartY());
-    	//goal = grid.getCell(grid.getEndX(), grid.getEndY());
-        double h = 0;
-        
+    {     
+    	double h = 0;
+    	boolean run = true;
         int currentX = s.getColumn();
         int currentY = s.getRow();
         int futureX = s.getColumn();
         int futureY = s.getRow();
-        if(runOnce)
+        if(run)
         {
         	while(currentX != futureX && currentY != futureY)
         	{
@@ -76,7 +73,7 @@ public class AgentDistance extends PathSearch{
         		else
         			currentY++;
         	}
-        	runOnce = false;
+        	run = false;
         }
 		
 		return h;

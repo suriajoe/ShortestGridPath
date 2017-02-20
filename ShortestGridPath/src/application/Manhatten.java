@@ -19,7 +19,7 @@ public class Manhatten extends PathSearch{
     
     public void printPath(double totalCost,double cellTotal,int blockCounter,int pathLength)
     {
-    	System.out.println("AStar Manhatten Heurisitc path length:" + pathLength);
+    	System.out.println("AStar Manhatten Heuristic path length:" + pathLength);
         System.out.println("AStar Manhatten Heuristic cell cost total: " + cellTotal);
         System.out.println("Number of cells traversed: " + blockCounter);
     }
