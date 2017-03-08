@@ -14,6 +14,7 @@ public class Node {
 	public String toString() {
 		return "(" + p1 + ", " + p2 + ")";
 	}
+
 	public String toListString(){
 		String s = "";
 		boolean isFirst = true;

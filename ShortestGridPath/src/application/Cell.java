@@ -6,11 +6,16 @@ public class Cell extends AnchorPane
     int column; //X coordinate
     int row;    //Y coordinate
     double value;  //0=blocked,1=empty,2=hard/rough,0.25=empty(highway),0.5=rough(highway)
-    int type;      //0=blocked,1=empty,2=hard/rough,3=empty(highway),4=rough(highway),5=start/goal vertex
+    int type;      //0=blocked,1=empty,2=hard/rough,3=empty(highway),4=rough(highway),5=start,6=goal vertex
+    double f; 
+    double g;
+    double h;
+    double key;
+    double v;
+    Cell cell = null;
 
     public Cell(int column, int row) 
     {
-
         this.column = column;
         this.row = row;
         
@@ -25,6 +30,8 @@ public class Cell extends AnchorPane
      	this.row = row;
      	this.value = value;
      	this.type = type;
+     	this.g = 2147483647; //represents infinity
+     	this.v = 2147483647; //represents infinity
      	
      	getStyleClass().add("cell");
      	
@@ -70,10 +77,58 @@ public class Cell extends AnchorPane
     {
     	this.row = r;
     }
+    
+    public double getF()
+    {
+    	return this.f;
+    }
+
+    public void setF()
+    {
+    	this.f = getG()+getH();
+    }
+    public void setFZero()
+    {
+    	this.f = 0;
+    }
+    public double getG()
+    {
+    	return this.g;
+    }
+
+    public void setG(double g)
+    {
+    	this.g = g;
+    }
+    public double getH()
+    {
+    	return this.h;
+    }
+
+    public void setH(double h)
+    {
+    	this.h = h;
+    }
+    public void setKey(double key){
+    	this.key = key;
+    }
+    public double getKey()
+    {
+    	return this.key;
+    }
+    public void setV(double v){
+    	this.v = v;
+    }
+    public double getV()
+    {
+    	return this.v;
+    }
+    
     public void highlight() 
     {
         // ensure the style is only once in the style list
         getStyleClass().remove("cell-highlight");
+        getStyleClass().remove("cell-highway");
 
         // add style
         getStyleClass().add("cell-highlight");
@@ -83,14 +138,27 @@ public class Cell extends AnchorPane
     {
         getStyleClass().remove("cell-highlight");
     }
+    
+    public void hover()
+    {
+        getStyleClass().remove("cell-hover");
 
+        getStyleClass().add("cell-hover");
+    }
+    public void unhover()
+    {
+        getStyleClass().remove("cell-hover");
+
+    }
+    /*Path */
     public void hoverHighlight() 
     {
         getStyleClass().remove("cell-hover-highlight");
+        getStyleClass().remove("cell-highway");
 
         getStyleClass().add("cell-hover-highlight");
     }
-
+    /*Path */
     public void hoverUnhighlight() 
     {
         getStyleClass().remove("cell-hover-highlight");
@@ -102,14 +170,30 @@ public class Cell extends AnchorPane
     }
     public void start() 
     {
+    	clean();
+
         getStyleClass().add("cell-start");
+    }
+    public void startClean() 
+    {
+        getStyleClass().remove("cell-start");
     }
     public void goal() 
     {
+    	clean();
         getStyleClass().add("cell-goal");
+    }
+    public void goalClean() 
+    {
+        getStyleClass().remove("cell-goal");
     }
     public void brown()
     {
+    	getStyleClass().add("cell-rough");
+    }
+    public void brownReadFile()
+    {
+    	getStyleClass().remove("cell-highlight");
     	getStyleClass().add("cell-rough");
     }
     public boolean isOccupied()
@@ -118,6 +202,8 @@ public class Cell extends AnchorPane
     }
     public void highwayColor()
     {
+        getStyleClass().remove("cell-highway");
+
     	getStyleClass().add("cell-highway");
     }
 
